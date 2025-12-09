@@ -1,14 +1,144 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model appointment {
+  appointment_id Int                 @id @default(autoincrement())
+  reason         String?
+  price          Decimal             @default(200) @db.Decimal(10, 2)
+  status         appointment_status
+  result         appointment_result?
+  med_notes      String?
+  pet_id         Int
+  slot_id        Int                 @unique
+  pet            pet                 @relation(fields: [pet_id], references: [pet_id], onDelete: NoAction, onUpdate: NoAction)
+  slot           slot                @relation(fields: [slot_id], references: [slot_id], onDelete: NoAction, onUpdate: NoAction)
+  diagnosis      diagnosis[]
+}
+
+model breed {
+  breed_id   Int     @id @default(autoincrement())
+  name       String  @default("unpedigreed") @db.VarChar(32)
+  species_id Int
+  species    species @relation(fields: [species_id], references: [species_id], onDelete: NoAction, onUpdate: NoAction)
+  pet        pet[]
+
+  @@unique([species_id, name])
+}
+
+model contact_data {
+  contact_data_id Int    @id @default(autoincrement())
+  email           String @unique @db.VarChar(32)
+  phone           String @unique @db.VarChar(32)
+  owner           owner?
+  vet             vet?
+}
+
+model diagnosis {
+  diagnosis_id   Int         @id @default(autoincrement())
+  illness        String      @db.VarChar(32)
+  description    String
+  is_active      Boolean
+  appointment_id Int
+  appointment    appointment @relation(fields: [appointment_id], references: [appointment_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([appointment_id, illness])
+}
+
+model owner {
+  owner_id        Int          @id @default(autoincrement())
+  name            String       @db.VarChar(32)
+  surname         String       @db.VarChar(32)
+  contact_data_id Int          @unique
+  contact_data    contact_data @relation(fields: [contact_data_id], references: [contact_data_id], onDelete: NoAction, onUpdate: NoAction)
+  pet             pet[]
+}
+
+model pet {
+  pet_id        Int           @id @default(autoincrement())
+  name          String        @db.VarChar(32)
+  date_of_birth DateTime      @db.Date
+  gender        gender_type
+  owner_id      Int
+  breed_id      Int
+  appointment   appointment[]
+  breed         breed         @relation(fields: [breed_id], references: [breed_id], onDelete: NoAction, onUpdate: NoAction)
+  owner         owner         @relation(fields: [owner_id], references: [owner_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model schedule_template {
+  template_id   Int          @id @default(autoincrement())
+  day_of_week   days_of_week
+  start_time    DateTime     @db.Time(6)
+  end_time      DateTime     @db.Time(6)
+  slot_duration Int          @db.SmallInt
+  vet_id        Int
+  vet           vet          @relation(fields: [vet_id], references: [vet_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([vet_id, day_of_week])
+}
+
+model slot {
+  slot_id     Int          @id @default(autoincrement())
+  date        DateTime     @db.Date
+  start_time  DateTime     @db.Time(6)
+  vet_id      Int
+  appointment appointment?
+  vet         vet          @relation(fields: [vet_id], references: [vet_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([vet_id, date, start_time])
+}
+
+model species {
+  species_id Int     @id @default(autoincrement())
+  name       String  @db.VarChar(32)
+  breed      breed[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model vet {
+  vet_id            Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(32)
+  surname           String              @db.VarChar(32)
+  experience        Int?                @db.SmallInt
+  specialisation    String              @db.VarChar(32)
+  is_active         Boolean
+  contact_data_id   Int                 @unique
+  schedule_template schedule_template[]
+  slot              slot[]
+  contact_data      contact_data        @relation(fields: [contact_data_id], references: [contact_data_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+enum appointment_result {
+  healthy
+  diagnosed
+  recovered
+}
+
+enum appointment_status {
+  scheduled
+  in_progress @map("in progress")
+  completed
+}
+
+enum days_of_week {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+  sunday
+}
+
+enum gender_type {
+  male
+  female
 }
