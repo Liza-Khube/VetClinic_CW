@@ -65,7 +65,7 @@ model diagnosis {
 
 model owner {
   user_id         Int          @id @unique
-  user            user         @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  user            user         @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
   pet             pet[]
 }
 
@@ -121,7 +121,7 @@ model species {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model vet {
   user_id           Int                 @id @unique
-  user              user                @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  user              user                @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
   experience        Int                 @db.SmallInt
   specialisation    String              @db.VarChar(32)
   is_active         Boolean
