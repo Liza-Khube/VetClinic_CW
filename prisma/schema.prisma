@@ -23,6 +23,9 @@ model appointment {
   pet            pet                 @relation(fields: [pet_id], references: [pet_id], onDelete: NoAction, onUpdate: NoAction)
   slot           slot                @relation(fields: [slot_id], references: [slot_id], onDelete: NoAction, onUpdate: NoAction)
   diagnosis      diagnosis[]
+
+  @@index([pet_id, created_at])
+  @@index([status])
 }
 
 model breed {
@@ -82,6 +85,9 @@ model pet {
   breed         breed         @relation(fields: [breed_id], references: [breed_id], onDelete: NoAction, onUpdate: NoAction)
   owner         owner         @relation(fields: [owner_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   appointment   appointment[]
+
+  @@index([breed_id])
+  @@index([owner_user_id, is_deleted])
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -110,6 +116,8 @@ model slot {
   vet         vet          @relation(fields: [vet_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([vet_user_id, date, start_time])
+  @@index([vet_user_id, date])
+  @@index([vet_user_id])
 }
 
 model species {
