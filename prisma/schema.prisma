@@ -33,12 +33,16 @@ model breed {
   @@unique([species_id, name])
 }
 
-model contact_data {
-  contact_data_id Int    @id @default(autoincrement())
-  email           String @unique @db.VarChar(32)
-  phone           String @unique @db.VarChar(32)
-  owner           owner?
-  vet             vet?
+model user {
+  user_id   Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(50) 
+  phone     String?  @unique @db.VarChar(50)
+  name      String   @db.VarChar(32)
+  surname   String   @db.VarChar(32)
+  password  String 
+  role      role
+  owner     owner?
+  vet       vet?
 }
 
 model diagnosis {
@@ -53,11 +57,10 @@ model diagnosis {
 }
 
 model owner {
-  owner_id        Int          @id @default(autoincrement())
+  user_id         Int          @id @unique
+  user            user         @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   name            String       @db.VarChar(32)
   surname         String       @db.VarChar(32)
-  contact_data_id Int          @unique
-  contact_data    contact_data @relation(fields: [contact_data_id], references: [contact_data_id], onDelete: NoAction, onUpdate: NoAction)
   pet             pet[]
 }
 
@@ -66,11 +69,11 @@ model pet {
   name          String        @db.VarChar(32)
   date_of_birth DateTime      @db.Date
   gender        gender_type
-  owner_id      Int
   breed_id      Int
-  appointment   appointment[]
+  owner_user_id Int           
   breed         breed         @relation(fields: [breed_id], references: [breed_id], onDelete: NoAction, onUpdate: NoAction)
-  owner         owner         @relation(fields: [owner_id], references: [owner_id], onDelete: NoAction, onUpdate: NoAction)
+  owner         owner         @relation(fields: [owner_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  appointment   appointment[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -80,21 +83,21 @@ model schedule_template {
   start_time    DateTime     @db.Time(6)
   end_time      DateTime     @db.Time(6)
   slot_duration Int          @db.SmallInt
-  vet_id        Int
-  vet           vet          @relation(fields: [vet_id], references: [vet_id], onDelete: NoAction, onUpdate: NoAction)
+  vet_user_id   Int
+  vet           vet         @relation(fields: [vet_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([vet_id, day_of_week])
+  @@unique([vet_user_id, day_of_week])
 }
 
 model slot {
   slot_id     Int          @id @default(autoincrement())
   date        DateTime     @db.Date
   start_time  DateTime     @db.Time(6)
-  vet_id      Int
+  vet_user_id Int
   appointment appointment?
-  vet         vet          @relation(fields: [vet_id], references: [vet_id], onDelete: NoAction, onUpdate: NoAction)
+  vet         vet         @relation(fields: [vet_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([vet_id, date, start_time])
+  @@unique([vet_user_id, date, start_time])
 }
 
 model species {
@@ -105,16 +108,15 @@ model species {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model vet {
-  vet_id            Int                 @id @default(autoincrement())
+  user_id           Int                 @id @unique
+  user              user                @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   name              String              @db.VarChar(32)
   surname           String              @db.VarChar(32)
-  experience        Int?                @db.SmallInt
+  experience        Int                 @db.SmallInt
   specialisation    String              @db.VarChar(32)
   is_active         Boolean
-  contact_data_id   Int                 @unique
   schedule_template schedule_template[]
   slot              slot[]
-  contact_data      contact_data        @relation(fields: [contact_data_id], references: [contact_data_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 enum appointment_result {
@@ -142,4 +144,10 @@ enum days_of_week {
 enum gender_type {
   male
   female
+}
+
+enum role {
+  owner
+  vet
+  admin
 }
