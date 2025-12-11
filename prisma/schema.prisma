@@ -16,6 +16,8 @@ model appointment {
   status         appointment_status
   result         appointment_result?
   med_notes      String?
+  created_at     DateTime            @default(now())
+  updated_at     DateTime            @updatedAt
   pet_id         Int
   slot_id        Int                 @unique
   pet            pet                 @relation(fields: [pet_id], references: [pet_id], onDelete: NoAction, onUpdate: NoAction)
@@ -24,25 +26,28 @@ model appointment {
 }
 
 model breed {
-  breed_id   Int     @id @default(autoincrement())
-  name       String  @default("unpedigreed") @db.VarChar(32)
+  breed_id   Int      @id @default(autoincrement())
+  name       String   @default("unpedigreed") @db.VarChar(32)
   species_id Int
-  species    species @relation(fields: [species_id], references: [species_id], onDelete: NoAction, onUpdate: NoAction)
+  species    species  @relation(fields: [species_id], references: [species_id], onDelete: NoAction, onUpdate: NoAction)
   pet        pet[]
 
   @@unique([species_id, name])
 }
 
 model user {
-  user_id   Int      @id @default(autoincrement())
-  email     String   @unique @db.VarChar(50) 
-  phone     String?  @unique @db.VarChar(50)
-  name      String   @db.VarChar(32)
-  surname   String   @db.VarChar(32)
-  password  String 
-  role      role
-  owner     owner?
-  vet       vet?
+  user_id     Int       @id @default(autoincrement())
+  email       String    @unique @db.VarChar(50) 
+  phone       String?   @unique @db.VarChar(50)
+  name        String    @db.VarChar(32)
+  surname     String    @db.VarChar(32)
+  password    String 
+  role        role
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  is_deleted  Boolean   @default(false)
+  owner       owner?
+  vet         vet?
 }
 
 model diagnosis {
@@ -50,6 +55,8 @@ model diagnosis {
   illness        String      @db.VarChar(32)
   description    String
   is_active      Boolean
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
   appointment_id Int
   appointment    appointment @relation(fields: [appointment_id], references: [appointment_id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -67,6 +74,9 @@ model pet {
   name          String        @db.VarChar(32)
   date_of_birth DateTime      @db.Date
   gender        gender_type
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+  is_deleted    Boolean       @default(false)
   breed_id      Int
   owner_user_id Int           
   breed         breed         @relation(fields: [breed_id], references: [breed_id], onDelete: NoAction, onUpdate: NoAction)
@@ -80,6 +90,8 @@ model schedule_template {
   day_of_week   days_of_week
   start_time    DateTime     @db.Time(6)
   end_time      DateTime     @db.Time(6)
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
   slot_duration Int          @db.SmallInt
   vet_user_id   Int
   vet           vet          @relation(fields: [vet_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
@@ -91,6 +103,8 @@ model slot {
   slot_id     Int          @id @default(autoincrement())
   date        DateTime     @db.Date
   start_time  DateTime     @db.Time(6)
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
   vet_user_id Int
   appointment appointment?
   vet         vet          @relation(fields: [vet_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
@@ -99,8 +113,8 @@ model slot {
 }
 
 model species {
-  species_id Int     @id @default(autoincrement())
-  name       String  @unique @db.VarChar(32)
+  species_id Int       @id @default(autoincrement())
+  name       String    @unique @db.VarChar(32)
   breed      breed[]
 }
 
