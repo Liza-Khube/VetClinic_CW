@@ -30,7 +30,7 @@ model appointment {
 
 model breed {
   breed_id   Int      @id @default(autoincrement())
-  name       String   @default("unpedigreed") @db.VarChar(32)
+  name       String   @default("unpedigreed") @db.VarChar(50)
   species_id Int
   species    species  @relation(fields: [species_id], references: [species_id], onDelete: NoAction, onUpdate: NoAction)
   pet        pet[]
@@ -41,9 +41,9 @@ model breed {
 model user {
   user_id     Int       @id @default(autoincrement())
   email       String    @unique @db.VarChar(50) 
-  phone       String?   @unique @db.VarChar(50)
-  name        String    @db.VarChar(32)
-  surname     String    @db.VarChar(32)
+  phone       String?   @unique @db.VarChar(32)
+  name        String    @db.VarChar(50)
+  surname     String    @db.VarChar(50)
   password    String 
   role        role
   created_at  DateTime  @default(now())
@@ -55,7 +55,7 @@ model user {
 
 model diagnosis {
   diagnosis_id   Int         @id @default(autoincrement())
-  illness        String      @db.VarChar(32)
+  illness        String      @db.VarChar(100)
   description    String
   is_active      Boolean
   created_at     DateTime    @default(now())
@@ -74,7 +74,7 @@ model owner {
 
 model pet {
   pet_id        Int           @id @default(autoincrement())
-  name          String        @db.VarChar(32)
+  name          String        @db.VarChar(50)
   date_of_birth DateTime      @db.Date
   gender        gender_type
   created_at    DateTime      @default(now())
@@ -94,8 +94,8 @@ model pet {
 model schedule_template {
   template_id   Int          @id @default(autoincrement())
   day_of_week   days_of_week
-  start_time    DateTime     @db.Time(6)
-  end_time      DateTime     @db.Time(6)
+  start_time    DateTime     @db.Time(0)
+  end_time      DateTime     @db.Time(0)
   created_at    DateTime     @default(now())
   updated_at    DateTime     @updatedAt
   slot_duration Int          @db.SmallInt
@@ -108,7 +108,7 @@ model schedule_template {
 model slot {
   slot_id     Int          @id @default(autoincrement())
   date        DateTime     @db.Date
-  start_time  DateTime     @db.Time(6)
+  start_time  DateTime     @db.Time(0)
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt
   vet_user_id Int
@@ -122,7 +122,7 @@ model slot {
 
 model species {
   species_id Int       @id @default(autoincrement())
-  name       String    @unique @db.VarChar(32)
+  name       String    @unique @db.VarChar(50)
   breed      breed[]
 }
 
