@@ -51,7 +51,7 @@ model diagnosis {
   description    String
   is_active      Boolean
   appointment_id Int
-  appointment    appointment @relation(fields: [appointment_id], references: [appointment_id], onDelete: NoAction, onUpdate: NoAction)
+  appointment    appointment @relation(fields: [appointment_id], references: [appointment_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([appointment_id, illness])
 }
