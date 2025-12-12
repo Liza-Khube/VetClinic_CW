@@ -1,16 +1,13 @@
 import express from 'express';
+import userRoutes from './routes/userRoutes.js';
+import errorHandler from './middleware/errorHandler.js';
 
 const app = express();
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  console.log('User requested the home page website');
-  res.send(`
-    <body style="background:#0000ff; color:#fafafa">
-      <h1>Hello World!</h1>
-    </body>
-    `);
-});
+app.use('/api/users', userRoutes);
+
+app.use(errorHandler);
 
 export default app;
