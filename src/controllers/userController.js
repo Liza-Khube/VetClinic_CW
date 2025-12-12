@@ -30,16 +30,6 @@ export const registerUser = async (req, res, next) => {
   }
 };
 
-export const loginUser = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-    const result = await userService.login(email, password);
-    res.status(200).json(result);
-  } catch (err) {
-    next(err);
-  }
-};
-
 export const createVet = async (req, res, next) => {
   try {
     const {
@@ -59,9 +49,9 @@ export const createVet = async (req, res, next) => {
       vetPassword,
       name,
       surname,
+      specialisation,
       phone,
-      experience,
-      specialisation
+      experience
     );
 
     res.status(201).json({
@@ -73,8 +63,20 @@ export const createVet = async (req, res, next) => {
         name: vet.name,
         surname: vet.surname,
         phone: vet.phone || null,
+        experience: vet.experience || null,
+        specialisation: vet.specialisation,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const loginUser = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const result = await userService.login(email, password);
+    res.status(200).json(result);
   } catch (err) {
     next(err);
   }

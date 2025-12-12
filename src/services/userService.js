@@ -23,7 +23,7 @@ export class UserService {
     this.SALT_ROUNDS = 10;
   }
 
-  async registerOwner(email, password, name, surname, phone = undefined) {
+  async registerOwner(email, password, name, surname, phone = null) {
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
       throw new ConflictError('User with this email already exists.');
@@ -47,9 +47,9 @@ export class UserService {
     vetPassword,
     name,
     surname,
+    specialisation,
     phone = null,
-    experience,
-    specialisation
+    experience = null
   ) {
     const creator = await this.userRepository.findById(adminId);
 
@@ -59,7 +59,7 @@ export class UserService {
       );
     }
 
-    if (experience < 0) {
+    if (experience !== null && experience < 0) {
       throw new Error('Experience cannot be negative');
     }
 
@@ -75,9 +75,9 @@ export class UserService {
       passwordHash,
       name,
       surname,
+      specialisation,
       phone,
-      experience,
-      specialisation
+      experience
     );
 
     return newVet;

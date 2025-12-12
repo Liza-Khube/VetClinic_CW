@@ -41,9 +41,9 @@ export class UserRepository {
     passwordHash,
     name,
     surname,
+    specialisation,
     phone = null,
-    experience = null,
-    specialisation
+    experience = null
   ) {
     return prisma.$transaction(async (tx) => {
       const newVetUser = await tx.user.create({
