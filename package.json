@@ -8,11 +8,18 @@
   },
   "devDependencies": {
     "@prisma/client": "^5.22.0",
+    "@types/jest": "^30.0.0",
+    "@types/supertest": "^6.0.3",
+    "bcrypt": "^6.0.0",
+    "jest": "^30.2.0",
+    "jsonwebtoken": "^9.0.3",
     "nodemon": "^3.1.11",
-    "prisma": "^5.22.0"
+    "prisma": "^5.22.0",
+    "supertest": "^7.1.4"
   },
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node ./src/server.js",
+    "dev": "nodemon ./src/server.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   }
 }

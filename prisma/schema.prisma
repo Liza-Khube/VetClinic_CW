@@ -130,7 +130,7 @@ model species {
 model vet {
   user_id           Int                 @id @unique
   user              user                @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-  experience        Int                 @db.SmallInt
+  experience        Int?                @db.SmallInt
   specialisation    String              @db.VarChar(32)
   is_active         Boolean
   schedule_template schedule_template[]
