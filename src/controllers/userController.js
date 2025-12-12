@@ -42,8 +42,15 @@ export const loginUser = async (req, res, next) => {
 
 export const createVet = async (req, res, next) => {
   try {
-    const { vetEmail, vetPassword, name, surname, experience, specialisation } =
-      req.body;
+    const {
+      vetEmail,
+      vetPassword,
+      name,
+      surname,
+      phone,
+      experience,
+      specialisation,
+    } = req.body;
     const adminId = req.user.user_id;
 
     const vet = await userService.createVetAccount(
@@ -52,6 +59,7 @@ export const createVet = async (req, res, next) => {
       vetPassword,
       name,
       surname,
+      phone,
       experience,
       specialisation
     );
@@ -64,6 +72,7 @@ export const createVet = async (req, res, next) => {
         role: vet.role,
         name: vet.name,
         surname: vet.surname,
+        phone: vet.phone || null,
       },
     });
   } catch (err) {

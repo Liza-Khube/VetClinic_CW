@@ -47,6 +47,7 @@ export class UserService {
     vetPassword,
     name,
     surname,
+    phone = null,
     experience,
     specialisation
   ) {
@@ -74,6 +75,7 @@ export class UserService {
       passwordHash,
       name,
       surname,
+      phone,
       experience,
       specialisation
     );
