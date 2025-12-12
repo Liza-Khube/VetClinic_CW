@@ -50,11 +50,16 @@ export class UserService {
     experience,
     specialisation
   ) {
-    const caller = await this.userRepository.findById(adminId);
-    if (!caller || caller.role !== 'admin') {
+    const creator = await this.userRepository.findById(adminId);
+
+    if (!creator || creator.role !== 'admin') {
       throw new PermissionDeniedError(
         'Only administrators can create vet accounts.'
       );
+    }
+
+    if (experience < 0) {
+      throw new Error('Experience cannot be negative');
     }
 
     const existingUser = await this.userRepository.findByEmail(vetEmail);
