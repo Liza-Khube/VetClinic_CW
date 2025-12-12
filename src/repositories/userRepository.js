@@ -13,19 +13,6 @@ export class UserRepository {
     });
   }
 
-  async createUser(email, passwordHash, role, name, surname, phone) {
-    return prisma.user.create({
-      data: {
-        email,
-        password: passwordHash,
-        role,
-        name,
-        surname,
-        phone,
-      },
-    });
-  }
-
   async createOwnerProfile(email, passwordHash, name, surname, phone = null) {
     return prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
