@@ -70,6 +70,62 @@ export class UserRepository {
     });
   }
 
+  async findVetsWithFiltration(
+    minExperience = 0,
+    isActive,
+    limit = null,
+    offset = 0
+  ) {
+    const minExp = minExperience || 0; // якщо minExperience буде null, то щоб стало 0 (для правильної фільтрації в подальшому)
+
+    const expFiltration = [
+      {
+        experience: {
+          gte: minExp,
+        },
+      },
+      ...(minExp === 0 ? [{ experience: null }] : []),
+    ];
+
+    const filterOptions = [{ OR: expFiltration }];
+
+    if (isActive !== undefined) filterOptions.push({ is_active: isActive });
+
+    const selectOptions = {
+      where: {
+        role: 'vet',
+        vet: {
+          is: {
+            AND: filterOptions,
+          },
+        },
+      },
+      include: {
+        vet: true,
+      },
+      orderBy: [
+        {
+          vet: {
+            is_active: 'desc',
+          },
+        },
+        {
+          vet: {
+            experience: {
+              sort: 'desc',
+              nulls: 'last',
+            },
+          },
+        },
+      ],
+      skip: offset,
+    };
+
+    if (limit > 0) selectOptions.take = limit;
+
+    return prisma.user.findMany(selectOptions);
+  }
+
   async updateRole(userId, newRole) {
     return prisma.user.update({
       where: { user_id: userId },

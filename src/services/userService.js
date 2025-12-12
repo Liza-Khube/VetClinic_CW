@@ -83,6 +83,37 @@ export class UserService {
     return newVet;
   }
 
+  async getVetsDetails(minExperience, isActive, limit, offset) {
+    const vetUsers = await this.userRepository.findVetsWithFiltration(
+      minExperience,
+      isActive,
+      limit,
+      offset
+    );
+
+    const filteredVets = vetUsers.map((vetUser) => {
+      return {
+        vet_user_id: vetUser.user_id,
+        email: vetUser.email,
+        name: vetUser.name,
+        surname: vetUser.surname,
+        phone: vetUser.phone || null,
+        experience: vetUser.vet.experience || null,
+        specialisation: vetUser.vet.specialisation,
+        is_active: vetUser.vet.is_active,
+      };
+    });
+
+    return {
+      pagination: {
+        limit,
+        offset,
+      },
+
+      vets: filteredVets,
+    };
+  }
+
   async login(email, password) {
     const user = await this.userRepository.findByEmail(email);
 

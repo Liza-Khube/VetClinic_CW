@@ -81,3 +81,27 @@ export const loginUser = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getVets = async (req, res, next) => {
+  try {
+    const { minExperience, isActive, limit, offset } = req.query;
+
+    const minExp = parseInt(minExperience) || 0;
+
+    const isActiveStatus =
+      isActive !== undefined ? isActive.toLowerCase() === 'true' : undefined;
+    const amountLimit = parseInt(limit) || null;
+    const pageOffset = parseInt(offset) || 0;
+
+    const result = await userService.getVetsDetails(
+      minExp,
+      isActiveStatus,
+      amountLimit,
+      pageOffset
+    );
+
+    res.status(200).json({ message: 'Vet list is shown', ...result });
+  } catch (err) {
+    next(err);
+  }
+};
