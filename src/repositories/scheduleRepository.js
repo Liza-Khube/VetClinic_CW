@@ -51,4 +51,13 @@ export class scheduleRepository {
       };
     });
   }
+
+  async getVetSchedule(vetUserId) {
+    return prisma.schedule_template.findMany({
+      where: { vet_user_id: vetUserId },
+      orderBy: {
+        day_of_week: 'asc',
+      },
+    });
+  }
 }

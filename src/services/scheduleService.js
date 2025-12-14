@@ -227,4 +227,13 @@ export class ScheduleService {
       }
     }
   }
+
+  async getVetSchedule(vetUserId) {
+    const vet = await this.scheduleRepository.getVetById(vetUserId);
+    if (!vet) {
+      throw { status: 404, message: 'Vet not found' };
+    }
+
+    return this.scheduleRepository.getVetSchedule(vetUserId);
+  }
 }

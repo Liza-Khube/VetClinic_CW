@@ -28,3 +28,24 @@ export const createSchedule = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getSchedule = async (req, res, next) => {
+  try {
+    const vetUserId = parseInt(req.params.vetUserId);
+
+    if (isNaN(vetUserId)) {
+      return res
+        .status(400)
+        .json({ message: 'Invalid vet id in URL parameter' });
+    }
+
+    const schedule = await scheduleService.getVetSchedule(vetUserId);
+
+    res.status(200).json({
+      message: 'Schedule retrieved successfully',
+      data: schedule,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

@@ -1,6 +1,9 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth.js';
-import { createSchedule } from '../controllers/scheduleController.js';
+import {
+  createSchedule,
+  getSchedule,
+} from '../controllers/scheduleController.js';
 
 const router = express.Router();
 
@@ -10,5 +13,7 @@ router.post(
   authorize('admin'),
   createSchedule
 );
+
+router.get('/vets/:vetUserId/schedule', getSchedule);
 
 export default router;
