@@ -4,13 +4,13 @@ import { UserRepository } from '../repositories/userRepository.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-class ConflictError extends Error {
+export class ConflictError extends Error {
   constructor(message) {
     super(message);
     this.name = 'ConflictError';
   }
 }
-class PermissionDeniedError extends Error {
+export class PermissionDeniedError extends Error {
   constructor(message) {
     super(message);
     this.name = 'PermissionDeniedError';
@@ -54,9 +54,7 @@ export class UserService {
     const creator = await this.userRepository.findById(adminId);
 
     if (!creator || creator.role !== 'admin') {
-      throw new PermissionDeniedError(
-        'Only administrators can create vet accounts.'
-      );
+      throw new PermissionDeniedError('Only administrators can create vet accounts.');
     }
 
     if (experience !== null && experience < 0) {
@@ -126,11 +124,9 @@ export class UserService {
       throw new Error('Invalid password');
     }
 
-    const token = jwt.sign(
-      { userId: user.user_id, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '3h' }
-    );
+    const token = jwt.sign({ userId: user.user_id, role: user.role }, JWT_SECRET, {
+      expiresIn: '3h',
+    });
 
     return {
       token,
