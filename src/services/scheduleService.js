@@ -234,6 +234,29 @@ export class ScheduleService {
       throw { status: 404, message: 'Vet not found' };
     }
 
-    return this.scheduleRepository.getVetSchedule(vetUserId);
+    const scheduleTemplates = await this.scheduleRepository.getVetSchedule(
+      vetUserId
+    );
+
+    const formattedSchedule = scheduleTemplates.map((schedule) => {
+      const getTime = (dateObject) => {
+        if (!dateObject) return null;
+
+        const hours = dateObject.getHours().toString().padStart(2, '0');
+        const minutes = dateObject.getMinutes().toString().padStart(2, '0');
+
+        return `${hours}:${minutes}`;
+      };
+
+      return {
+        template_id: schedule.template_id,
+        day_of_week: schedule.day_of_week,
+        start_time: getTime(schedule.start_time),
+        end_time: getTime(schedule.end_time),
+        slot_duration: schedule.vet_user_id,
+      };
+    });
+
+    return formattedSchedule;
   }
 }
