@@ -17,6 +17,16 @@ export const createPet = async (req, res, next) => {
       return res.status(400).json({ error: "Gender must be 'male' or 'female'" });
     }
 
+    const birthDateObj = new Date(dateOfBirth);
+    const now = new Date();
+
+    if (isNaN(birthDateObj.getTime())) {
+      return res.status(400).json({ error: 'Invalid date format' });
+    }
+    if (birthDateObj > now) {
+      return res.status(400).json({ error: 'Date of birth cannot be in the future' });
+    }
+
     const newPet = await petService.createPet(ownerId, {
       name,
       dateOfBirth,
@@ -28,8 +38,8 @@ export const createPet = async (req, res, next) => {
       message: 'Pet created successfully',
       pet: newPet,
     });
-  } catch (error) {
-    res.status(500).json({ error: error.message || 'Internal Server Error' });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -42,7 +52,16 @@ export const viewPetsOwner = async (req, res, next) => {
 
     const result = await petService.viewPetsOwner(ownerId);
     res.status(200).json({ message: `Pet list of owner ${ownerId} is shown`, ...result });
-  } catch (error) {
-    res.status(500).json({ error: error.message || 'Internal Server Error' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const viewAllPets = async (req, res, next) => {
+  try {
+    const result = await petService.viewAllPets();
+    res.status(200).json({ message: `Pet list is shown`, data: result });
+  } catch (err) {
+    next(err);
   }
 };
