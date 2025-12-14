@@ -1,13 +1,12 @@
-import prisma from '../prismaClient.js';
+import { SpeciesRepository } from '../repositories/speciesRepository.js';
 
 export class SpeciesService {
-  async findCreateSpecies(speciesName, tx = prisma) {
+  constructor() {
+    this.speciesRepository = new SpeciesRepository();
+  }
+  async findCreateSpecies(speciesName, tx) {
     const normalizedName = speciesName.trim().toLowerCase();
 
-    return await tx.species.upsert({
-      where: { name: normalizedName },
-      update: {},
-      create: { name: normalizedName },
-    });
+    return await this.speciesRepository.findCreateSpecies(normalizedName, tx);
   }
 }
