@@ -32,6 +32,7 @@ export const createSchedule = async (req, res, next) => {
 export const getSchedule = async (req, res, next) => {
   try {
     const vetUserId = parseInt(req.params.vetUserId);
+    const { dayChoice } = req.query;
 
     if (isNaN(vetUserId)) {
       return res
@@ -39,7 +40,7 @@ export const getSchedule = async (req, res, next) => {
         .json({ message: 'Invalid vet id in URL parameter' });
     }
 
-    const schedule = await scheduleService.getVetSchedule(vetUserId);
+    const schedule = await scheduleService.getVetSchedule(vetUserId, dayChoice);
 
     res.status(200).json({
       message: 'Schedule retrieved successfully',

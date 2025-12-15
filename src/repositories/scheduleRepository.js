@@ -52,9 +52,15 @@ export class scheduleRepository {
     });
   }
 
-  async getVetSchedule(vetUserId) {
+  async getVetSchedule(vetUserId, dayChoice) {
+    const scheduleOptions = { vet_user_id: vetUserId };
+
+    if (dayChoice) {
+      scheduleOptions.day_of_week = dayChoice;
+    }
+
     return prisma.schedule_template.findMany({
-      where: { vet_user_id: vetUserId },
+      where: scheduleOptions,
       orderBy: {
         day_of_week: 'asc',
       },

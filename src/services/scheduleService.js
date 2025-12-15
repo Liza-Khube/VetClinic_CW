@@ -1,5 +1,15 @@
 import { scheduleRepository } from '../repositories/scheduleRepository.js';
 
+const VALID_DAYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+];
+
 export class ScheduleService {
   constructor() {
     this.scheduleRepository = new scheduleRepository();
@@ -173,18 +183,8 @@ export class ScheduleService {
       };
     }
 
-    const validDays = [
-      'monday',
-      'tuesday',
-      'wednesday',
-      'thursday',
-      'friday',
-      'saturday',
-      'sunday',
-    ];
-
     for (const day of scheduleData) {
-      if (!validDays.includes(day.day_of_week)) {
+      if (!VALID_DAYS.includes(day.day_of_week)) {
         throw {
           status: 400,
           message: `Invalid day of week: ${day.day_of_week}`,
@@ -228,32 +228,41 @@ export class ScheduleService {
     }
   }
 
-  async getVetSchedule(vetUserId) {
+  getTime = (dateObject) => {
+    if (!dateObject) return null;
+
+    const hours = dateObject.getHours().toString().padStart(2, '0');
+    const minutes = dateObject.getMinutes().toString().padStart(2, '0');
+
+    return `${hours}:${minutes}`;
+  };
+
+  async getVetSchedule(vetUserId, dayChoice) {
     const vet = await this.scheduleRepository.getVetById(vetUserId);
     if (!vet) {
       throw { status: 404, message: 'Vet not found' };
     }
 
+    if (dayChoice && !VALID_DAYS.includes(dayChoice.toLowerCase())) {
+      throw {
+        status: 400,
+        message: `Invalid day of week: ${dayChoice}`,
+      };
+    }
+
     const scheduleTemplates = await this.scheduleRepository.getVetSchedule(
-      vetUserId
+      vetUserId,
+      dayChoice ? dayChoice.toLowerCase() : undefined
     );
 
     const formattedSchedule = scheduleTemplates.map((schedule) => {
-      const getTime = (dateObject) => {
-        if (!dateObject) return null;
-
-        const hours = dateObject.getHours().toString().padStart(2, '0');
-        const minutes = dateObject.getMinutes().toString().padStart(2, '0');
-
-        return `${hours}:${minutes}`;
-      };
-
       return {
         template_id: schedule.template_id,
         day_of_week: schedule.day_of_week,
-        start_time: getTime(schedule.start_time),
-        end_time: getTime(schedule.end_time),
-        slot_duration: schedule.vet_user_id,
+        start_time: this.getTime(schedule.start_time),
+        end_time: this.getTime(schedule.end_time),
+        slot_duration: schedule.slot_duration,
+        vet_user_id: schedule.vet_user_id,
       };
     });
 
