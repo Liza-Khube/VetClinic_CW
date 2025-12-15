@@ -50,3 +50,33 @@ export const getSchedule = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getSlots = async (req, res, next) => {
+  try {
+    const vetUserId = parseInt(req.params.vetUserId);
+    const { dateChoice, limit, offset } = req.query;
+
+    const amountLimit = parseInt(limit) || null;
+    const pageOffset = parseInt(offset) || 0;
+
+    if (isNaN(vetUserId)) {
+      return res
+        .status(400)
+        .json({ message: 'Invalid vet id in URL parameter' });
+    }
+
+    const slots = await scheduleService.getSlotsList(
+      vetUserId,
+      dateChoice,
+      amountLimit,
+      pageOffset
+    );
+
+    res.status(200).json({
+      message: 'Slots retrieved successfully',
+      data: slots,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

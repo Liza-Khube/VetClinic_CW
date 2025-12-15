@@ -66,4 +66,27 @@ export class scheduleRepository {
       },
     });
   }
+
+  async getSlotsList(vetUserId, dateChoice, limit = null, offset = 0) {
+    const slotsOptions = { vet_user_id: vetUserId };
+
+    if (dateChoice) slotsOptions.date = new Date(dateChoice);
+
+    const selectOptions = {
+      where: slotsOptions,
+      orderBy: [
+        {
+          date: 'asc',
+        },
+        {
+          start_time: 'asc',
+        },
+      ],
+      skip: offset,
+    };
+
+    if (limit > 0) selectOptions.take = limit;
+
+    return prisma.slot.findMany(selectOptions);
+  }
 }

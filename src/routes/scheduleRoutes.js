@@ -3,6 +3,7 @@ import { authenticate, authorize } from '../middleware/auth.js';
 import {
   createSchedule,
   getSchedule,
+  getSlots,
 } from '../controllers/scheduleController.js';
 
 const router = express.Router();
@@ -15,5 +16,7 @@ router.post(
 );
 
 router.get('/vets/:vetUserId/schedule', getSchedule);
+
+router.get('/vets/:vetUserId/schedule/slots', getSlots);
 
 export default router;

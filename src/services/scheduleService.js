@@ -228,13 +228,23 @@ export class ScheduleService {
     }
   }
 
-  getTime = (dateObject) => {
+  getProperTime = (dateObject) => {
     if (!dateObject) return null;
 
     const hours = dateObject.getHours().toString().padStart(2, '0');
     const minutes = dateObject.getMinutes().toString().padStart(2, '0');
 
     return `${hours}:${minutes}`;
+  };
+
+  getProperDate = (dateObject) => {
+    if (!dateObject) return null;
+
+    const year = dateObject.getFullYear().toString();
+    const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+    const date = dateObject.getDate().toString().padStart(2, '0');
+
+    return `${year}-${month}-${date}`;
   };
 
   async getVetSchedule(vetUserId, dayChoice) {
@@ -259,13 +269,46 @@ export class ScheduleService {
       return {
         template_id: schedule.template_id,
         day_of_week: schedule.day_of_week,
-        start_time: this.getTime(schedule.start_time),
-        end_time: this.getTime(schedule.end_time),
+        start_time: this.getProperTime(schedule.start_time),
+        end_time: this.getProperTime(schedule.end_time),
         slot_duration: schedule.slot_duration,
         vet_user_id: schedule.vet_user_id,
       };
     });
 
     return formattedSchedule;
+  }
+
+  async getSlotsList(vetUserId, dateChoice, limit, offset) {
+    const vet = await this.scheduleRepository.getVetById(vetUserId);
+    if (!vet) {
+      throw { status: 404, message: 'Vet not found' };
+    }
+
+    const slots = await this.scheduleRepository.getSlotsList(
+      vetUserId,
+      dateChoice,
+      limit,
+      offset
+    );
+
+    const filteredSlots = slots.map((slot) => {
+      return {
+        slot_id: slot.slot_id,
+        date: this.getProperDate(slot.date),
+        start_time: this.getProperTime(slot.start_time),
+        vet_user_id: slot.vet_user_id,
+        template_id: slot.template_id,
+      };
+    });
+
+    return {
+      pagination: {
+        limit,
+        offset,
+      },
+      date: dateChoice || 'All dates',
+      slots: filteredSlots,
+    };
   }
 }
