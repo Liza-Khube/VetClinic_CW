@@ -45,6 +45,7 @@ export class PetService {
         ownerId,
         tx
       );
+      return newPet;
     });
   }
 
