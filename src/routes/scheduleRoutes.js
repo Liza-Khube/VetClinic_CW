@@ -1,6 +1,7 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth.js';
 import {
+  addSlots,
   createSchedule,
   getSchedule,
   getSlots,
@@ -13,6 +14,13 @@ router.post(
   authenticate,
   authorize('admin'),
   createSchedule
+);
+
+router.post(
+  '/vets/:vetUserId/schedule/slots',
+  authenticate,
+  authorize('admin'),
+  addSlots
 );
 
 router.get('/vets/:vetUserId/schedule', getSchedule);

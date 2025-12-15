@@ -89,4 +89,27 @@ export class scheduleRepository {
 
     return prisma.slot.findMany(selectOptions);
   }
+
+  async getExistingSlotsInDateRange(vetUserId, startDate, endDate) {
+    return prisma.slot.findMany({
+      where: {
+        vet_user_id: vetUserId,
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      select: {
+        date: true,
+        start_time: true,
+      },
+    });
+  }
+
+  async createSlots(slots) {
+    return prisma.slot.createMany({
+      data: slots,
+      skipDuplicates: true,
+    });
+  }
 }

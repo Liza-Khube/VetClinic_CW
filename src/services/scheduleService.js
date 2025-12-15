@@ -228,13 +228,130 @@ export class ScheduleService {
     }
   }
 
+  async addSlotsToSchedule(vetUserId, startDate, endDate) {
+    const vet = await this.scheduleRepository.getVetById(vetUserId);
+    if (!vet) {
+      throw { status: 404, message: 'Vet not found' };
+    }
+
+    if (!vet.is_active) {
+      throw {
+        status: 400,
+        message: 'Vet is inactive. Cannot add slots for inactive vet',
+      };
+    }
+
+    const existingSchedule = await this.scheduleRepository.getVetSchedule(
+      vetUserId
+    );
+
+    if (!existingSchedule || existingSchedule.length === 0) {
+      throw {
+        status: 404,
+        message: 'Schedule not found. Please create a schedule first',
+      };
+    }
+
+    const parsedStartDate = new Date(startDate);
+    const parsedEndDate = new Date(endDate);
+
+    if (isNaN(parsedStartDate.getTime())) {
+      throw { status: 400, message: 'Invalid start date format' };
+    }
+
+    if (isNaN(parsedEndDate.getTime())) {
+      throw { status: 400, message: 'Invalid end date format' };
+    }
+
+    if (parsedStartDate >= parsedEndDate) {
+      throw {
+        status: 400,
+        message: 'End date must be after start date',
+      };
+    }
+
+    const scheduleData = existingSchedule.map((template) => ({
+      day_of_week: template.day_of_week,
+      start_time: this.getProperTime(template.start_time),
+      end_time: this.getProperTime(template.end_time),
+      slot_duration: template.slot_duration,
+    }));
+
+    const scheduleWithSlots = this.prepareScheduleData(
+      scheduleData,
+      parsedStartDate,
+      parsedEndDate,
+      vetUserId
+    );
+
+    const newSlots = [];
+
+    for (const daySchedule of scheduleWithSlots) {
+      const template = existingSchedule.find(
+        (t) => t.day_of_week === daySchedule.day_of_week
+      );
+
+      const slotsWithTemplateId = daySchedule.slots.map((slot) => ({
+        ...slot,
+        template_id: template.template_id,
+      }));
+
+      newSlots.push(...slotsWithTemplateId);
+    }
+
+    if (newSlots.length === 0) {
+      throw {
+        status: 409,
+        message:
+          'No slots to add: The specified date range contains no working days for this vet',
+      };
+    }
+
+    const existingSlots =
+      await this.scheduleRepository.getExistingSlotsInDateRange(
+        vetUserId,
+        parsedStartDate,
+        parsedEndDate
+      );
+
+    const existingSlotSet = new Set();
+    existingSlots.forEach((slot) => {
+      const dateKey = this.getProperDate(slot.date);
+      const timeKey = this.getProperTime(slot.start_time);
+      existingSlotSet.add(`${dateKey}|${timeKey}`);
+    });
+
+    const slotsToInsert = newSlots.filter((slot) => {
+      const dateKey = this.getProperDate(slot.date);
+      const timeKey = this.getProperTime(slot.start_time);
+      return !existingSlotSet.has(`${dateKey}|${timeKey}`);
+    });
+
+    if (slotsToInsert.length === 0) {
+      throw {
+        status: 409,
+        message:
+          'No new slots to add: All slots in the specified date range already exist',
+      };
+    }
+
+    const result = await this.scheduleRepository.createSlots(slotsToInsert);
+
+    return {
+      addedSlots: result.count,
+      startDate: this.getProperDate(parsedStartDate),
+      endDate: this.getProperDate(parsedEndDate),
+    };
+  }
+
   getProperTime = (dateObject) => {
     if (!dateObject) return null;
 
     const hours = dateObject.getHours().toString().padStart(2, '0');
     const minutes = dateObject.getMinutes().toString().padStart(2, '0');
+    const seconds = '00';
 
-    return `${hours}:${minutes}`;
+    return `${hours}:${minutes}:${seconds}`;
   };
 
   getProperDate = (dateObject) => {
