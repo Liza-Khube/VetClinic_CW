@@ -30,7 +30,7 @@ export class PetRepository {
       whereCondition.owner_user_id = ownerId;
     }
 
-    return prisma.pet.findUnique({
+    return prisma.pet.findFirst({
       where: whereCondition,
       include: {
         breed: {
