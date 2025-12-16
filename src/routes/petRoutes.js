@@ -1,9 +1,10 @@
 import express from 'express';
-import { viewAllPets } from '../controllers/petController.js';
+import { viewAllPets, viewOwnerPetReport } from '../controllers/petController.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/view-all-pets', authenticate, authorize('admin'), viewAllPets);
+router.get('/all-pets', authenticate, authorize('admin'), viewAllPets);
+router.get('/owners-with-pets', viewOwnerPetReport);
 
 export default router;
