@@ -75,4 +75,48 @@ export class PetRepository {
       },
     });
   }
+
+  async findOwnerPetReport(minPetsAmount) {
+    const result = await prisma.$queryRaw`
+      WITH owner_pet_stats AS (
+        SELECT 
+          o.user_id,
+          u.name || ' ' || u.surname AS owner_name,
+          u.email,
+          u.phone,
+        COUNT(p.pet_id) AS pet_count
+        FROM owner o
+        JOIN "user" u ON o.user_id = u.user_id
+        JOIN pet p ON o.user_id = p.owner_user_id
+        JOIN breed b ON p.breed_id = b.breed_id
+        JOIN species s ON b.species_id = s.species_id
+        WHERE p.is_deleted = FALSE AND u.is_deleted = FALSE
+        GROUP BY o.user_id, u.name, u.surname, u.email, u.phone
+        HAVING COUNT(p.pet_id) > ${minPetsAmount}
+      ),
+      pet_details AS (
+        SELECT 
+          p.owner_user_id,
+          STRING_AGG(p.name || ' (' || b.name || ' ' || s.name || ')', ', ' ORDER BY p.name) AS pet_names_with_breeds
+        FROM pet p
+        JOIN breed b ON p.breed_id = b.breed_id
+        JOIN species s ON b.species_id = s.species_id
+        WHERE p.is_deleted = FALSE
+        GROUP BY p.owner_user_id
+      )
+      SELECT 
+        ops.owner_name,
+        ops.email,
+        ops.phone,
+        ops.pet_count,
+        pd.pet_names_with_breeds
+      FROM owner_pet_stats ops
+      LEFT JOIN pet_details pd ON ops.user_id = pd.owner_user_id
+      ORDER BY ops.pet_count DESC
+    `;
+    return result.map((row) => ({
+      ...row,
+      pet_count: Number(row.pet_count),
+    }));
+  }
 }

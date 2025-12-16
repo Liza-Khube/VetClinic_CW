@@ -65,3 +65,20 @@ export const viewAllPets = async (req, res, next) => {
     next(err);
   }
 };
+
+export const viewOwnerPetReport = async (req, res) => {
+  try {
+    const { min_pets } = req.query;
+    const data = await petService.viewOwnerPetReport(min_pets);
+
+    res.status(200).json({
+      message: `Statistic is shown`,
+      data: data,
+    });
+  } catch (err) {
+    console.error('Error in getPetsOwnerStat:', err);
+    res.status(500).json({
+      message: 'Error while fetching pet statistic',
+    });
+  }
+};

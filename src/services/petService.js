@@ -68,4 +68,18 @@ export class PetService {
       throw new Error(`Fail to view all pets: ${error.message}`);
     }
   }
+
+  async viewOwnerPetReport(minPetsAmount) {
+    let minAmount = parseInt(minPetsAmount, 10);
+
+    if (isNaN(minAmount)) {
+      minAmount = 0;
+    }
+
+    try {
+      return await this.petRepository.findOwnerPetReport(minAmount);
+    } catch (error) {
+      throw new Error(`Fail to view owners and their pets: ${error.message}`);
+    }
+  }
 }
