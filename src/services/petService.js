@@ -34,8 +34,15 @@ export class PetService {
         throw new ConflictError('Pet already exists');
       }
 
+      const checkedBreedName =
+        breedName && breed.trim() !== '' ? breedName : 'unpedigreed';
+
       const species = await speciesService.findCreateSpecies(speciesName, tx);
-      const breed = await breedService.findCreateBreed(species.species_id, breedName, tx);
+      const breed = await breedService.findCreateBreed(
+        species.species_id,
+        checkedBreedName,
+        tx
+      );
 
       const newPet = await this.petRepository.createPet(
         name,

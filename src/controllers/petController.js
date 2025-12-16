@@ -9,7 +9,7 @@ export const createPet = async (req, res, next) => {
       return res.status(401).json({ error: 'User not authenticated' });
     }
     const { name, dateOfBirth, gender, speciesName, breedName } = req.body;
-    if (!name || !dateOfBirth || !gender || !speciesName || !breedName) {
+    if (!name || !dateOfBirth || !gender || !speciesName) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
