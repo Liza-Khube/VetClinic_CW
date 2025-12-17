@@ -97,6 +97,7 @@ export class UserRepository {
     const selectOptions = {
       where: {
         role: 'vet',
+        is_deleted: false,
         vet: {
           is: {
             AND: filterOptions,

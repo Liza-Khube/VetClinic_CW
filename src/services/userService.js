@@ -26,7 +26,7 @@ export class UserService {
   async registerOwner(email, password, name, surname, phone = null) {
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
-      throw new ConflictError('User with this email already exists.');
+      throw new ConflictError('User with this email already exists');
     }
 
     const passwordHash = await bcrypt.hash(password, this.SALT_ROUNDS);
@@ -55,7 +55,7 @@ export class UserService {
 
     if (!creator || creator.role !== 'admin') {
       throw new PermissionDeniedError(
-        'Only administrators can create vet accounts.'
+        'Only administrators can create vet accounts'
       );
     }
 
@@ -65,7 +65,7 @@ export class UserService {
 
     const existingUser = await this.userRepository.findByEmail(vetEmail);
     if (existingUser) {
-      throw new ConflictError('User with this email already exists.');
+      throw new ConflictError('User with this email already exists');
     }
 
     const passwordHash = await bcrypt.hash(vetPassword, this.SALT_ROUNDS);

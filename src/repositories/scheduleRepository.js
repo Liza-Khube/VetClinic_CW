@@ -4,6 +4,7 @@ export class scheduleRepository {
   async getVetById(vetUserId) {
     return prisma.vet.findUnique({
       where: { user_id: vetUserId },
+      include: { user: true },
     });
   }
 

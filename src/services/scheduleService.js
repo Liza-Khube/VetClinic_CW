@@ -29,7 +29,7 @@ export class ScheduleService {
     }
 
     const vet = await this.scheduleRepository.getVetById(vetUserId);
-    if (!vet) {
+    if (!vet || vet.user.is_deleted) {
       throw { status: 404, message: 'Vet not found' };
     }
 
@@ -230,7 +230,7 @@ export class ScheduleService {
 
   async addSlotsToSchedule(vetUserId, startDate, endDate) {
     const vet = await this.scheduleRepository.getVetById(vetUserId);
-    if (!vet) {
+    if (!vet || vet.user.is_deleted) {
       throw { status: 404, message: 'Vet not found' };
     }
 
@@ -366,7 +366,7 @@ export class ScheduleService {
 
   async getVetSchedule(vetUserId, dayChoice) {
     const vet = await this.scheduleRepository.getVetById(vetUserId);
-    if (!vet) {
+    if (!vet || vet.user.is_deleted) {
       throw { status: 404, message: 'Vet not found' };
     }
 
@@ -398,7 +398,7 @@ export class ScheduleService {
 
   async getSlotsList(vetUserId, dateChoice, limit, offset) {
     const vet = await this.scheduleRepository.getVetById(vetUserId);
-    if (!vet) {
+    if (!vet || vet.user.is_deleted) {
       throw { status: 404, message: 'Vet not found' };
     }
 
