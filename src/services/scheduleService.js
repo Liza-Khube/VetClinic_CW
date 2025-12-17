@@ -428,4 +428,36 @@ export class ScheduleService {
       slots: filteredSlots,
     };
   }
+
+  async getClinicStats(month, year, minSlotsCount) {
+    const targetMonth = parseInt(month);
+    const targetYear = parseInt(year);
+    const targetMinSlotsCount = parseInt(minSlotsCount);
+
+    if (isNaN(targetMonth) || targetMonth < 1 || targetMonth > 12) {
+      throw new Error('Invalid month provided. Must be between 1 and 12');
+    }
+
+    if (isNaN(targetYear) || targetYear < 2000) {
+      throw new Error('Invalid year provided');
+    }
+
+    if (isNaN(targetMinSlotsCount) || targetMinSlotsCount < 50) {
+      throw new Error(
+        'Invalid slots count provided. Less than 50 is not enouth for this clinic'
+      );
+    }
+
+    const analytics = await this.scheduleRepository.getClinicStatistics(
+      targetMonth,
+      targetYear,
+      targetMinSlotsCount
+    );
+
+    return {
+      period: `${targetYear}-${targetMonth}`,
+      vetsSucceded: analytics.length,
+      reportData: analytics,
+    };
+  }
 }

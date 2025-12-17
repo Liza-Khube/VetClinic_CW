@@ -3,6 +3,7 @@ import { authenticate, authorize } from '../middleware/auth.js';
 import {
   addSlots,
   createSchedule,
+  getClinicAnalytics,
   getSchedule,
   getSlots,
 } from '../controllers/scheduleController.js';
@@ -26,5 +27,12 @@ router.post(
 router.get('/vets/:vetUserId/schedule', getSchedule);
 
 router.get('/vets/:vetUserId/schedule/slots', getSlots);
+
+router.get(
+  '/vets/schedule/analytics',
+  authenticate,
+  authorize('admin'),
+  getClinicAnalytics
+);
 
 export default router;

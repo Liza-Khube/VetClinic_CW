@@ -112,4 +112,36 @@ export class scheduleRepository {
       skipDuplicates: true,
     });
   }
+
+  async getClinicStatistics(month = 12, year = 2025, minSlotsCount = 50) {
+    return await prisma.$queryRaw`
+      WITH monthly_data AS (
+        SELECT 
+          s.vet_user_id,
+          ARRAY_AGG(DISTINCT st.slot_duration ORDER BY st.slot_duration) AS slot_durations,
+          COUNT(s.slot_id)::INT AS total_slots,
+          COUNT(DISTINCT s.date)::INT AS working_days,
+          ROUND(SUM(st.slot_duration) / 60.0, 2)::FLOAT AS total_hours
+        FROM slot s
+        INNER JOIN schedule_template st ON s.template_id = st.template_id
+        WHERE EXTRACT(MONTH FROM s.date) = ${month}
+          AND EXTRACT(YEAR FROM s.date) = ${year}
+        GROUP BY s.vet_user_id
+        HAVING COUNT(s.slot_id) > ${minSlotsCount}
+      )
+      SELECT
+        u.name || ' ' || u.surname AS vet_name,
+				u.email,
+        v.specialisation,
+        md.total_slots,
+        md.working_days,
+        md.slot_durations,
+        md.total_hours,
+        ROUND(md.total_slots::NUMERIC / md.working_days, 2)::FLOAT AS avg_slots_per_day
+      FROM monthly_data md
+      INNER JOIN vet v ON v.user_id = md.vet_user_id
+      INNER JOIN "user" u ON u.user_id = md.vet_user_id
+      ORDER BY md.total_hours DESC;
+    `;
+  }
 }

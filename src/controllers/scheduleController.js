@@ -118,3 +118,32 @@ export const addSlots = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getClinicAnalytics = async (req, res, next) => {
+  try {
+    const { month, year, minSlotsCount } = req.query;
+
+    const targetMonth = month ? parseInt(month) : 12;
+    const targetYear = year ? parseInt(year) : 2025;
+    const targetMinSlotsCount = minSlotsCount ? parseInt(minSlotsCount) : 50;
+
+    if (isNaN(targetMonth) || isNaN(targetYear) || isNaN(targetMinSlotsCount)) {
+      return res.status(400).json({
+        message: 'Month, year and minSlotsCount must be valid numbers',
+      });
+    }
+
+    const stats = await scheduleService.getClinicStats(
+      targetMonth,
+      targetYear,
+      targetMinSlotsCount
+    );
+
+    res.status(200).json({
+      message: 'Clinic performance report generated',
+      ...stats,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
