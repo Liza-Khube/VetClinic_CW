@@ -26,7 +26,7 @@ export class UserService {
   async registerOwner(email, password, name, surname, phone = null) {
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
-      throw new ConflictError('User with this email already exists.');
+      throw new ConflictError('User with this email already exists');
     }
 
     const passwordHash = await bcrypt.hash(password, this.SALT_ROUNDS);
@@ -54,7 +54,9 @@ export class UserService {
     const creator = await this.userRepository.findById(adminId);
 
     if (!creator || creator.role !== 'admin') {
-      throw new PermissionDeniedError('Only administrators can create vet accounts.');
+      throw new PermissionDeniedError(
+        'Only administrators can create vet accounts'
+      );
     }
 
     if (experience !== null && experience < 0) {
@@ -63,7 +65,7 @@ export class UserService {
 
     const existingUser = await this.userRepository.findByEmail(vetEmail);
     if (existingUser) {
-      throw new ConflictError('User with this email already exists.');
+      throw new ConflictError('User with this email already exists');
     }
 
     const passwordHash = await bcrypt.hash(vetPassword, this.SALT_ROUNDS);
@@ -124,9 +126,13 @@ export class UserService {
       throw new Error('Invalid password');
     }
 
-    const token = jwt.sign({ userId: user.user_id, role: user.role }, JWT_SECRET, {
-      expiresIn: '3h',
-    });
+    const token = jwt.sign(
+      { userId: user.user_id, role: user.role },
+      JWT_SECRET,
+      {
+        expiresIn: '3h',
+      }
+    );
 
     return {
       token,

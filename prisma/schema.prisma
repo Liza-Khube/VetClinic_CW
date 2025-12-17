@@ -101,19 +101,23 @@ model schedule_template {
   slot_duration Int          @db.SmallInt
   vet_user_id   Int
   vet           vet          @relation(fields: [vet_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  slot          slot[]
 
   @@unique([vet_user_id, day_of_week])
 }
 
 model slot {
-  slot_id     Int          @id @default(autoincrement())
-  date        DateTime     @db.Date
-  start_time  DateTime     @db.Time(0)
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
-  vet_user_id Int
+  slot_id            Int                @id @default(autoincrement())
+  date               DateTime           @db.Date
+  start_time         DateTime           @db.Time(0)
+  created_at         DateTime           @default(now())
+  updated_at         DateTime           @updatedAt
+  vet_user_id        Int
+  template_id        Int
+  vet                vet                @relation(fields: [vet_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  schedule_template  schedule_template  @relation(fields: [template_id], references: [template_id], onDelete: NoAction, onUpdate: NoAction)
   appointment appointment?
-  vet         vet          @relation(fields: [vet_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+
 
   @@unique([vet_user_id, date, start_time])
   @@index([vet_user_id, date])

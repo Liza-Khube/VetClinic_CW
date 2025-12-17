@@ -57,7 +57,7 @@ export class UserRepository {
         },
       });
 
-      await tx.vet.create({
+      const vetParameters = await tx.vet.create({
         data: {
           user_id: newVetUser.user_id,
           experience,
@@ -66,7 +66,10 @@ export class UserRepository {
         },
       });
 
-      return newVetUser;
+      return {
+        ...newVetUser,
+        ...vetParameters,
+      };
     });
   }
 
@@ -76,7 +79,7 @@ export class UserRepository {
     limit = null,
     offset = 0
   ) {
-    const minExp = minExperience || 0; // якщо minExperience буде null, то щоб стало 0 (для правильної фільтрації в подальшому)
+    const minExp = minExperience || 0;
 
     const expFiltration = [
       {
@@ -94,6 +97,7 @@ export class UserRepository {
     const selectOptions = {
       where: {
         role: 'vet',
+        is_deleted: false,
         vet: {
           is: {
             AND: filterOptions,
@@ -124,12 +128,5 @@ export class UserRepository {
     if (limit > 0) selectOptions.take = limit;
 
     return prisma.user.findMany(selectOptions);
-  }
-
-  async updateRole(userId, newRole) {
-    return prisma.user.update({
-      where: { user_id: userId },
-      data: { role: newRole },
-    });
   }
 }
