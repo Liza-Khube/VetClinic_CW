@@ -79,7 +79,7 @@ export class UserRepository {
     limit = null,
     offset = 0
   ) {
-    const minExp = minExperience || 0; // якщо minExperience буде null, то щоб стало 0 (для правильної фільтрації в подальшому)
+    const minExp = minExperience || 0;
 
     const expFiltration = [
       {
@@ -128,12 +128,5 @@ export class UserRepository {
     if (limit > 0) selectOptions.take = limit;
 
     return prisma.user.findMany(selectOptions);
-  }
-
-  async updateRole(userId, newRole) {
-    return prisma.user.update({
-      where: { user_id: userId },
-      data: { role: newRole },
-    });
   }
 }
