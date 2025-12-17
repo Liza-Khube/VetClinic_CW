@@ -4,13 +4,13 @@ import { UserRepository } from '../repositories/userRepository.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-class ConflictError extends Error {
+export class ConflictError extends Error {
   constructor(message) {
     super(message);
     this.name = 'ConflictError';
   }
 }
-class PermissionDeniedError extends Error {
+export class PermissionDeniedError extends Error {
   constructor(message) {
     super(message);
     this.name = 'PermissionDeniedError';
@@ -129,7 +129,9 @@ export class UserService {
     const token = jwt.sign(
       { userId: user.user_id, role: user.role },
       JWT_SECRET,
-      { expiresIn: '3h' }
+      {
+        expiresIn: '3h',
+      }
     );
 
     return {
