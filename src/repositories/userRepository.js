@@ -57,7 +57,7 @@ export class UserRepository {
         },
       });
 
-      await tx.vet.create({
+      const vetParameters = await tx.vet.create({
         data: {
           user_id: newVetUser.user_id,
           experience,
@@ -66,7 +66,10 @@ export class UserRepository {
         },
       });
 
-      return newVetUser;
+      return {
+        ...newVetUser,
+        ...vetParameters,
+      };
     });
   }
 
