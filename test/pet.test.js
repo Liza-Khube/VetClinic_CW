@@ -98,7 +98,7 @@ describe('Pet Controller Logic', () => {
       .expect(200);
 
     const response = await request(app)
-      .get('/api/owner/view-my-pets')
+      .get('/api/owner/my-pets')
       .set('Authorization', `Bearer ${ownerToken}`)
       .expect(200);
 
@@ -116,7 +116,7 @@ describe('Pet Controller Logic', () => {
       .expect(200);
 
     const response = await request(app)
-      .get('/api/pets/view-all-pets')
+      .get('/api/pets/all-pets')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
@@ -130,7 +130,7 @@ describe('Pet Controller Logic', () => {
 
   it('6. View All Pets Forbidden (Owner role)', async () => {
     await request(app)
-      .get('/api/pets/view-all-pets')
+      .get('/api/pets/all-pets')
       .set('Authorization', `Bearer ${ownerToken}`)
       .expect(403);
   });

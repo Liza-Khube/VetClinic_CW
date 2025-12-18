@@ -13,6 +13,14 @@ export class PetService {
     this.petRepository = new PetRepository();
     this.userRepository = new UserRepository();
   }
+
+  _checkedBreedName(breedName, currentPetBreedName = null) {
+    if (breedName !== undefined) {
+      return breedName !== '' ? breedName : 'unpedigreed';
+    }
+    return currentPetBreedName || 'unpedigreed';
+  }
+
   async createPet(ownerId, petData) {
     const { name, dateOfBirth, gender, speciesName, breedName } = petData;
     return await prisma.$transaction(async (tx) => {
@@ -26,7 +34,7 @@ export class PetService {
       }
 
       const existingPet = await this.petRepository.findPetByNameAndDate(
-        name.trim(),
+        name,
         dateOfBirth,
         ownerId
       );
@@ -34,13 +42,12 @@ export class PetService {
         throw new ConflictError('Pet already exists');
       }
 
-      const checkedBreedName =
-        breedName && breed.trim() !== '' ? breedName : 'unpedigreed';
+      const finalBreedName = this._checkedBreedName(breedName);
 
       const species = await speciesService.findCreateSpecies(speciesName, tx);
       const breed = await breedService.findCreateBreed(
         species.species_id,
-        checkedBreedName,
+        finalBreedName,
         tx
       );
 
@@ -56,11 +63,11 @@ export class PetService {
     });
   }
 
-  async viewPetsOwner(owner_user_id) {
+  async viewPetsOwner(ownerId) {
     try {
       const [pets, total] = await prisma.$transaction(async (tx) => [
-        await this.petRepository.findPetsOwner(owner_user_id, tx),
-        await this.petRepository.countPetsOwner(owner_user_id, tx),
+        await this.petRepository.findPetsOwner(ownerId, tx),
+        await this.petRepository.countPetsOwner(ownerId, tx),
       ]);
       return { pets, total };
     } catch (error) {
@@ -76,15 +83,46 @@ export class PetService {
     }
   }
 
+  async updatePet(userId, petId, updateData) {
+    const { name, dateOfBirth, gender, speciesName, breedName } = updateData;
+    return await prisma.$transaction(async (tx) => {
+      const pet = await this.petRepository.findPetById(petId);
+
+      if (!pet) {
+        throw new Error('Pet not found');
+      }
+      if (pet.owner_user_id !== userId) {
+        throw new PermissionDeniedError('User can only update their own pets');
+      }
+      if (pet.is_deleted) {
+        throw new Error('Pet is deleted');
+      }
+
+      const dataToUpdate = {};
+      if (name) dataToUpdate.name = name;
+      if (dateOfBirth) dataToUpdate.date_of_birth = dateOfBirth;
+      if (gender) dataToUpdate.gender = gender;
+      if (breedName || speciesName) {
+        const targetSpeciesName = speciesName || pet.breed.species.name;
+        let targetBreedName = this._checkedBreedName(breedName, pet.breed.name);
+
+        const species = await speciesService.findCreateSpecies(targetSpeciesName, tx);
+        const breed = await breedService.findCreateBreed(
+          species.species_id,
+          targetBreedName,
+          tx
+        );
+
+        dataToUpdate.breed_id = breed.breed_id;
+      }
+
+      return await this.petRepository.updatePet(petId, dataToUpdate, tx);
+    });
+  }
+
   async viewOwnerPetReport(minPetsAmount) {
-    let minAmount = parseInt(minPetsAmount, 10);
-
-    if (isNaN(minAmount)) {
-      minAmount = 0;
-    }
-
     try {
-      return await this.petRepository.findOwnerPetReport(minAmount);
+      return await this.petRepository.findOwnerPetReport(minPetsAmount);
     } catch (error) {
       throw new Error(`Fail to view owners and their pets: ${error.message}`);
     }
