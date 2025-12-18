@@ -13,6 +13,13 @@ export class UserRepository {
     });
   }
 
+  async findVetById(vetUserId, tx = prisma) {
+    return tx.vet.findUnique({
+      where: { user_id: vetUserId },
+      include: { user: true },
+    });
+  }
+
   async createOwnerProfile(email, passwordHash, name, surname, phone = null) {
     return prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
@@ -128,5 +135,22 @@ export class UserRepository {
     if (limit > 0) selectOptions.take = limit;
 
     return prisma.user.findMany(selectOptions);
+  }
+
+  async updateVetActiveness(
+    vetUserId,
+    activeStatus,
+    lastUpdatedAt,
+    tx = prisma
+  ) {
+    return await tx.vet.updateMany({
+      where: {
+        user_id: vetUserId,
+        updated_at: new Date(lastUpdatedAt),
+      },
+      data: {
+        is_active: activeStatus,
+      },
+    });
   }
 }

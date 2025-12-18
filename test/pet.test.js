@@ -28,11 +28,12 @@ let adminToken = '';
 let ownerToken = '';
 
 beforeEach(async () => {
+  await prisma.appointment.deleteMany();
+  await prisma.slot.deleteMany();
+  await prisma.schedule_template.deleteMany();
   await prisma.pet.deleteMany();
   await prisma.breed.deleteMany();
   await prisma.species.deleteMany();
-  await prisma.vet.deleteMany();
-  await prisma.owner.deleteMany();
   await prisma.user.deleteMany();
 
   const passwordHash = await bcrypt.hash(TEST_ADMIN_LOGIN.password, 10);
