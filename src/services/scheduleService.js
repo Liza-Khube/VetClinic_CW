@@ -362,9 +362,9 @@ export class ScheduleService {
       throw new Error('Invalid year provided');
     }
 
-    if (isNaN(targetMinSlotsCount) || targetMinSlotsCount < 50) {
+    if (isNaN(targetMinSlotsCount) || targetMinSlotsCount < 1) {
       throw new Error(
-        'Invalid slots count provided. Less than 50 is not enouth for this clinic'
+        'Invalid slots count provided. Min slots count must be at least 1'
       );
     }
 

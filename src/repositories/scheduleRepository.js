@@ -114,7 +114,7 @@ export class scheduleRepository {
     });
   }
 
-  async getClinicStatistics(month = 12, year = 2025, minSlotsCount = 50) {
+  async getClinicStatistics(month = 12, year = 2025, minSlotsCount = 1) {
     return await prisma.$queryRaw`
       WITH monthly_data AS (
         SELECT 
