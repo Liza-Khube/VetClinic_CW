@@ -19,6 +19,19 @@ export class PetRepository {
     return newPet;
   }
 
+  async findPetById(pet_id) {
+    return prisma.pet.findUnique({
+      where: {
+        pet_id,
+      },
+      include: {
+        breed: {
+          include: { species: true },
+        },
+      },
+    });
+  }
+
   async findPetByNameAndDate(name, dateOfBirth, ownerId = null) {
     const whereCondition = {
       name,
@@ -68,6 +81,20 @@ export class PetRepository {
 
   async findAllPets() {
     return await prisma.pet.findMany({
+      include: {
+        breed: {
+          include: { species: true },
+        },
+      },
+    });
+  }
+
+  async updatePet(pet_id, data, tx = prisma) {
+    return tx.pet.update({
+      where: {
+        pet_id,
+      },
+      data,
       include: {
         breed: {
           include: { species: true },

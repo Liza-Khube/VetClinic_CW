@@ -82,3 +82,42 @@ export const viewOwnerPetReport = async (req, res) => {
     });
   }
 };
+
+export const updatePet = async (req, res, next) => {
+  try {
+    const userId = req.user?.user_id;
+    const petId = parseInt(req.params.id, 10);
+    if (isNaN(petId)) {
+      return res.status(400).json({ error: 'Invalid pet ID format' });
+    }
+
+    const { name, dateOfBirth, gender, speciesName, breedName } = req.body;
+    if (gender && gender !== 'male' && gender !== 'female') {
+      return res.status(400).json({ error: "Gender must be 'male' or 'female'" });
+    }
+    if (dateOfBirth) {
+      const birthDateObj = new Date(dateOfBirth);
+      const now = new Date();
+
+      if (isNaN(birthDateObj.getTime())) {
+        return res.status(400).json({ error: 'Invalid date format' });
+      }
+      if (birthDateObj > now) {
+        return res.status(400).json({ error: 'Date of birth cannot be in the future' });
+      }
+    }
+    const updatedPet = await petService.updatePet(userId, petId, {
+      name,
+      dateOfBirth,
+      gender,
+      speciesName,
+      breedName,
+    });
+    res.status(200).json({
+      message: 'Pet updated successfully',
+      pet: updatedPet,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

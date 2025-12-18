@@ -76,6 +76,50 @@ export class PetService {
     }
   }
 
+  async updatePet(userId, petId, updateData) {
+    const { name, dateOfBirth, gender, speciesName, breedName } = updateData;
+    return await prisma.$transaction(async (tx) => {
+      const pet = await this.petRepository.findPetById(petId);
+
+      if (!pet) {
+        throw new Error('Pet not found');
+      }
+      if (pet.owner_user_id !== userId) {
+        throw new PermissionDeniedError('User can only update their own pets');
+      }
+      if (pet.is_deleted) {
+        throw new Error('Pet is deleted');
+      }
+
+      const dataToUpdate = {};
+      if (name) dataToUpdate.name = name.trim();
+      if (dateOfBirth) dataToUpdate.date_of_birth = new Date(dateOfBirth);
+      if (gender) dataToUpdate.gender = gender;
+      if (breedName || speciesName) {
+        const targetSpeciesName = speciesName || pet.breed.species.name;
+
+        let targetBreedName;
+        if (breedName !== undefined) {
+          targetBreedName =
+            breedName && breedName.trim() !== '' ? breedName : 'unpedigreed';
+        } else {
+          targetBreedName = pet.breed.name;
+        }
+
+        const species = await speciesService.findCreateSpecies(targetSpeciesName, tx);
+        const breed = await breedService.findCreateBreed(
+          species.species_id,
+          targetBreedName,
+          tx
+        );
+
+        dataToUpdate.breed_id = breed.breed_id;
+      }
+
+      return await this.petRepository.updatePet(petId, dataToUpdate, tx);
+    });
+  }
+
   async viewOwnerPetReport(minPetsAmount) {
     let minAmount = parseInt(minPetsAmount, 10);
 
