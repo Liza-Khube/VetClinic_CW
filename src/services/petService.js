@@ -35,7 +35,7 @@ export class PetService {
       }
 
       const checkedBreedName =
-        breedName && breed.trim() !== '' ? breedName : 'unpedigreed';
+        breedName && breedName.trim() !== '' ? breedName : 'unpedigreed';
 
       const species = await speciesService.findCreateSpecies(speciesName, tx);
       const breed = await breedService.findCreateBreed(
