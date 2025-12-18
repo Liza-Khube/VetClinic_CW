@@ -132,3 +132,21 @@ export const updateVetActiveStatus = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getOwners = async (req, res, next) => {
+  try {
+    const { limit, offset } = req.query;
+
+    const amountLimit = parseInt(limit) || null;
+    const pageOffset = parseInt(offset) || 0;
+
+    const result = await userService.getOwnersList(amountLimit, pageOffset);
+
+    return res.status(200).json({
+      message: `Owner list is shown`,
+      ...result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

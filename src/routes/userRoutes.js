@@ -5,6 +5,7 @@ import {
   createVet,
   getVets,
   updateVetActiveStatus,
+  getOwners,
 } from '../controllers/userController.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 
@@ -17,6 +18,8 @@ router.post('/login', loginUser);
 router.post('/create-vet', authenticate, authorize('admin'), createVet);
 
 router.get('/vets', getVets);
+
+router.get('/owners', authenticate, authorize('admin'), getOwners);
 
 router.patch(
   '/vets/:vetUserId/is-active',
