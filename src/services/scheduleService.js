@@ -355,17 +355,22 @@ export class ScheduleService {
     const targetMinSlotsCount = parseInt(minSlotsCount);
 
     if (isNaN(targetMonth) || targetMonth < 1 || targetMonth > 12) {
-      throw new Error('Invalid month provided. Must be between 1 and 12');
+      throw {
+        status: 400,
+        message: 'Invalid month provided. Must be between 1 and 12',
+      };
     }
 
     if (isNaN(targetYear) || targetYear < 2000) {
-      throw new Error('Invalid year provided');
+      throw { status: 400, message: 'Invalid year provided' };
     }
 
     if (isNaN(targetMinSlotsCount) || targetMinSlotsCount < 1) {
-      throw new Error(
-        'Invalid slots count provided. Min slots count must be at least 1'
-      );
+      throw {
+        status: 400,
+        message:
+          'Invalid slots count provided. Min slots count must be at least 1',
+      };
     }
 
     const analytics = await this.scheduleRepository.getClinicStatistics(
