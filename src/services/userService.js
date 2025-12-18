@@ -101,6 +101,7 @@ export class UserService {
         experience: vetUser.vet.experience || null,
         specialisation: vetUser.vet.specialisation,
         is_active: vetUser.vet.is_active,
+        updated_at: vetUser.updated_at,
       };
     });
 
