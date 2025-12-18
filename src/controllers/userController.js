@@ -105,3 +105,30 @@ export const getVets = async (req, res, next) => {
     next(err);
   }
 };
+
+export const updateVetActiveStatus = async (req, res, next) => {
+  try {
+    const { vetUserId } = req.params;
+    const { lastKnownUpdate } = req.body;
+
+    if (!lastKnownUpdate) {
+      return res.status(400).json({
+        message: 'The lastKnownUpdate timestamp is required',
+      });
+    }
+
+    const result = await userService.toggleVetActiveness(
+      parseInt(vetUserId),
+      lastKnownUpdate
+    );
+
+    return res.status(200).json({
+      message: `Vet status successfully changed to ${
+        result.is_active ? 'active' : 'inactive'
+      }`,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

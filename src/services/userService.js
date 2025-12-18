@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import prisma from '../prismaClient.js';
 import { UserRepository } from '../repositories/userRepository.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -146,5 +147,43 @@ export class UserService {
         phone: user.phone || null,
       },
     };
+  }
+
+  async toggleVetActiveness(vetUserId, lastKnownUpdate) {
+    return await prisma.$transaction(async (tx) => {
+      const vet = await this.userRepository.findVetById(vetUserId, tx);
+
+      if (!vet || vet.user.is_deleted) {
+        throw { status: 404, message: 'Vet not found' };
+      }
+
+      const newActiveStatus = !vet.is_active;
+
+      if (newActiveStatus) {
+        if (!vet.specialisation || vet.experience < 0) {
+          throw {
+            status: 400,
+            message:
+              'Cannot activate: vet does not have specialisation or experience is a negative number',
+          };
+        }
+      }
+
+      const result = await this.userRepository.updateVetActiveness(
+        vetUserId,
+        newActiveStatus,
+        lastKnownUpdate,
+        tx
+      );
+
+      if (result.count === 0) {
+        throw {
+          status: 409,
+          message: 'Vet profile was already updated. Refresh the data',
+        };
+      }
+
+      return { user_id: vetUserId, is_active: newActiveStatus };
+    });
   }
 }
