@@ -56,11 +56,11 @@ export class PetService {
     });
   }
 
-  async viewPetsOwner(owner_user_id) {
+  async viewPetsOwner(ownerId) {
     try {
       const [pets, total] = await prisma.$transaction(async (tx) => [
-        await this.petRepository.findPetsOwner(owner_user_id, tx),
-        await this.petRepository.countPetsOwner(owner_user_id, tx),
+        await this.petRepository.findPetsOwner(ownerId, tx),
+        await this.petRepository.countPetsOwner(ownerId, tx),
       ]);
       return { pets, total };
     } catch (error) {
