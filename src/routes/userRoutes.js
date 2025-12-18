@@ -18,6 +18,11 @@ router.post('/create-vet', authenticate, authorize('admin'), createVet);
 
 router.get('/vets', getVets);
 
-router.patch('/vets/:vetUserId/is-active', updateVetActiveStatus);
+router.patch(
+  '/vets/:vetUserId/is-active',
+  authenticate,
+  authorize('admin'),
+  updateVetActiveStatus
+);
 
 export default router;
