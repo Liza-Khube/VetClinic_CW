@@ -70,7 +70,7 @@ export const viewAllPets = async (req, res, next) => {
   }
 };
 
-export const viewOwnerPetReport = async (req, res) => {
+export const viewOwnerPetReport = async (req, res, next) => {
   try {
     const { min_pets } = req.query;
     let minAmount = parseInt(min_pets, 10);
@@ -85,10 +85,7 @@ export const viewOwnerPetReport = async (req, res) => {
       data: data,
     });
   } catch (err) {
-    console.error('Error in getPetsOwnerStat:', err);
-    res.status(500).json({
-      message: 'Error while fetching pet statistic',
-    });
+    next(err);
   }
 };
 
