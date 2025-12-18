@@ -153,4 +153,23 @@ export class UserRepository {
       },
     });
   }
+
+  async findOwnersList(limit = null, offset = 0) {
+    const selectOptions = {
+      where: {
+        role: 'owner',
+        is_deleted: false,
+      },
+      orderBy: [
+        {
+          surname: 'asc',
+        },
+      ],
+      skip: offset,
+    };
+
+    if (limit > 0) selectOptions.take = limit;
+
+    return prisma.user.findMany(selectOptions);
+  }
 }

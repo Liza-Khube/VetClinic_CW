@@ -186,4 +186,28 @@ export class UserService {
       return { user_id: vetUserId, is_active: newActiveStatus };
     });
   }
+
+  async getOwnersList(limit, offset) {
+    const ownerUsers = await this.userRepository.findOwnersList(limit, offset);
+
+    const filteredOwners = ownerUsers.map((ownerUser) => {
+      return {
+        owner_user_id: ownerUser.user_id,
+        email: ownerUser.email,
+        name: ownerUser.name,
+        surname: ownerUser.surname,
+        phone: ownerUser.phone || null,
+        updated_at: ownerUser.updated_at,
+      };
+    });
+
+    return {
+      pagination: {
+        limit,
+        offset,
+      },
+
+      owners: filteredOwners,
+    };
+  }
 }
