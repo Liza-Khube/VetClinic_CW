@@ -1,4 +1,10 @@
 import { scheduleRepository } from '../repositories/scheduleRepository.js';
+import {
+  getProperDate,
+  getProperTime,
+  findFirstDayOfWeek,
+  generateSlots,
+} from '../../utils/dateUtils.js';
 
 const VALID_DAYS = [
   'monday',
@@ -73,9 +79,9 @@ export class ScheduleService {
     for (const day of scheduleData) {
       const { day_of_week, start_time, end_time, slot_duration } = day;
 
-      const firstTemplateDay = this.findFirstDayOfWeek(startDate, day_of_week);
+      const firstTemplateDay = findFirstDayOfWeek(startDate, day_of_week);
 
-      const slots = this.generateSlots(
+      const slots = generateSlots(
         {
           start_time: new Date(`1970-01-01T${start_time}`),
           end_time: new Date(`1970-01-01T${end_time}`),
@@ -96,72 +102,6 @@ export class ScheduleService {
     }
 
     return scheduleWithSlots;
-  }
-
-  findFirstDayOfWeek(startDate, dayOfWeek) {
-    const dayMap = {
-      monday: 1,
-      tuesday: 2,
-      wednesday: 3,
-      thursday: 4,
-      friday: 5,
-      saturday: 6,
-      sunday: 7,
-    };
-
-    const targetDay = dayMap[dayOfWeek.toLowerCase()];
-    const resultDate = new Date(startDate);
-    const currentEnglishDay = resultDate.getDay();
-    const currentDay = currentEnglishDay === 0 ? 7 : currentEnglishDay;
-
-    let diff = targetDay - currentDay;
-    if (diff < 0) diff += 7;
-
-    resultDate.setDate(resultDate.getDate() + diff);
-    resultDate.setHours(0, 0, 0, 0);
-
-    return resultDate;
-  }
-
-  generateSlots(timeConfig, firstDate, endDateLimit, vetUserId) {
-    const { start_time, end_time, slot_duration } = timeConfig;
-
-    const slots = [];
-    const slotDurationMs = slot_duration * 60 * 1000;
-
-    let currentDate = new Date(firstDate);
-    currentDate.setHours(0, 0, 0, 0);
-
-    while (currentDate <= endDateLimit) {
-      let slotStartTime = new Date(currentDate);
-      slotStartTime.setHours(
-        start_time.getHours(),
-        start_time.getMinutes(),
-        0,
-        0
-      );
-
-      const dayEndTime = new Date(currentDate);
-      dayEndTime.setHours(end_time.getHours(), end_time.getMinutes(), 0, 0);
-
-      while (slotStartTime < dayEndTime) {
-        const slotEndTime = new Date(slotStartTime.getTime() + slotDurationMs);
-
-        if (slotEndTime > dayEndTime) break;
-
-        slots.push({
-          date: new Date(currentDate),
-          start_time: new Date(slotStartTime),
-          vet_user_id: vetUserId,
-        });
-
-        slotStartTime = slotEndTime;
-      }
-
-      currentDate.setDate(currentDate.getDate() + 7);
-    }
-
-    return slots;
   }
 
   validateScheduleData(scheduleData, startDate, durationDays) {
@@ -272,8 +212,8 @@ export class ScheduleService {
 
     const scheduleData = existingSchedule.map((template) => ({
       day_of_week: template.day_of_week,
-      start_time: this.getProperTime(template.start_time),
-      end_time: this.getProperTime(template.end_time),
+      start_time: getProperTime(template.start_time),
+      end_time: getProperTime(template.end_time),
       slot_duration: template.slot_duration,
     }));
 
@@ -316,14 +256,14 @@ export class ScheduleService {
 
     const existingSlotSet = new Set();
     existingSlots.forEach((slot) => {
-      const dateKey = this.getProperDate(slot.date);
-      const timeKey = this.getProperTime(slot.start_time);
+      const dateKey = getProperDate(slot.date);
+      const timeKey = getProperTime(slot.start_time);
       existingSlotSet.add(`${dateKey}|${timeKey}`);
     });
 
     const slotsToInsert = newSlots.filter((slot) => {
-      const dateKey = this.getProperDate(slot.date);
-      const timeKey = this.getProperTime(slot.start_time);
+      const dateKey = getProperDate(slot.date);
+      const timeKey = getProperTime(slot.start_time);
       return !existingSlotSet.has(`${dateKey}|${timeKey}`);
     });
 
@@ -339,30 +279,10 @@ export class ScheduleService {
 
     return {
       addedSlots: result.count,
-      startDate: this.getProperDate(parsedStartDate),
-      endDate: this.getProperDate(parsedEndDate),
+      startDate: getProperDate(parsedStartDate),
+      endDate: getProperDate(parsedEndDate),
     };
   }
-
-  getProperTime = (dateObject) => {
-    if (!dateObject) return null;
-
-    const hours = dateObject.getHours().toString().padStart(2, '0');
-    const minutes = dateObject.getMinutes().toString().padStart(2, '0');
-    const seconds = '00';
-
-    return `${hours}:${minutes}:${seconds}`;
-  };
-
-  getProperDate = (dateObject) => {
-    if (!dateObject) return null;
-
-    const year = dateObject.getFullYear().toString();
-    const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
-    const date = dateObject.getDate().toString().padStart(2, '0');
-
-    return `${year}-${month}-${date}`;
-  };
 
   async getVetSchedule(vetUserId, dayChoice) {
     const vet = await this.scheduleRepository.getVetById(vetUserId);
@@ -386,8 +306,8 @@ export class ScheduleService {
       return {
         template_id: schedule.template_id,
         day_of_week: schedule.day_of_week,
-        start_time: this.getProperTime(schedule.start_time),
-        end_time: this.getProperTime(schedule.end_time),
+        start_time: getProperTime(schedule.start_time),
+        end_time: getProperTime(schedule.end_time),
         slot_duration: schedule.slot_duration,
         vet_user_id: schedule.vet_user_id,
       };
@@ -412,8 +332,8 @@ export class ScheduleService {
     const filteredSlots = slots.map((slot) => {
       return {
         slot_id: slot.slot_id,
-        date: this.getProperDate(slot.date),
-        start_time: this.getProperTime(slot.start_time),
+        date: getProperDate(slot.date),
+        start_time: getProperTime(slot.start_time),
         vet_user_id: slot.vet_user_id,
         template_id: slot.template_id,
       };
