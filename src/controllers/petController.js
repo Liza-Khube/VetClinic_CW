@@ -103,8 +103,12 @@ export const updatePet = async (req, res, next) => {
       return res.status(400).json({ error: 'Invalid pet ID format' });
     }
 
-    let { name, dateOfBirth, gender, speciesName, breedName } = req.body;
-
+    let { name, dateOfBirth, gender, speciesName, breedName, is_deleted } = req.body;
+    if (is_deleted !== undefined) {
+      return res.status(400).json({
+        error: 'Cannot delete pet via update route',
+      });
+    }
     if (name) name = name.trim();
     if (breedName) breedName = breedName.trim();
     if (speciesName) speciesName = speciesName.trim();
