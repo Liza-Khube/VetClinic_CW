@@ -13,6 +13,14 @@ export class PetService {
     this.petRepository = new PetRepository();
     this.userRepository = new UserRepository();
   }
+
+  _checkedBreedName(breedName, currentPetBreedName = null) {
+    if (breedName !== undefined) {
+      return breedName !== '' ? breedName : 'unpedigreed';
+    }
+    return currentPetBreedName || 'unpedigreed';
+  }
+
   async createPet(ownerId, petData) {
     const { name, dateOfBirth, gender, speciesName, breedName } = petData;
     return await prisma.$transaction(async (tx) => {
@@ -26,7 +34,7 @@ export class PetService {
       }
 
       const existingPet = await this.petRepository.findPetByNameAndDate(
-        name.trim(),
+        name,
         dateOfBirth,
         ownerId
       );
@@ -34,13 +42,12 @@ export class PetService {
         throw new ConflictError('Pet already exists');
       }
 
-      const checkedBreedName =
-        breedName && breedName.trim() !== '' ? breedName : 'unpedigreed';
+      const finalBreedName = this._checkedBreedName(breedName);
 
       const species = await speciesService.findCreateSpecies(speciesName, tx);
       const breed = await breedService.findCreateBreed(
         species.species_id,
-        checkedBreedName,
+        finalBreedName,
         tx
       );
 
@@ -92,19 +99,12 @@ export class PetService {
       }
 
       const dataToUpdate = {};
-      if (name) dataToUpdate.name = name.trim();
-      if (dateOfBirth) dataToUpdate.date_of_birth = new Date(dateOfBirth);
+      if (name) dataToUpdate.name = name;
+      if (dateOfBirth) dataToUpdate.date_of_birth = dateOfBirth;
       if (gender) dataToUpdate.gender = gender;
       if (breedName || speciesName) {
         const targetSpeciesName = speciesName || pet.breed.species.name;
-
-        let targetBreedName;
-        if (breedName !== undefined) {
-          targetBreedName =
-            breedName && breedName.trim() !== '' ? breedName : 'unpedigreed';
-        } else {
-          targetBreedName = pet.breed.name;
-        }
+        let targetBreedName = this._checkedBreedName(breedName, pet.breed.name);
 
         const species = await speciesService.findCreateSpecies(targetSpeciesName, tx);
         const breed = await breedService.findCreateBreed(
@@ -121,14 +121,8 @@ export class PetService {
   }
 
   async viewOwnerPetReport(minPetsAmount) {
-    let minAmount = parseInt(minPetsAmount, 10);
-
-    if (isNaN(minAmount)) {
-      minAmount = 0;
-    }
-
     try {
-      return await this.petRepository.findOwnerPetReport(minAmount);
+      return await this.petRepository.findOwnerPetReport(minPetsAmount);
     } catch (error) {
       throw new Error(`Fail to view owners and their pets: ${error.message}`);
     }

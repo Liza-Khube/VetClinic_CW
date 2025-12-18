@@ -1,11 +1,11 @@
 import prisma from '../prismaClient.js';
 
 export class PetRepository {
-  async createPet(name, dateOfBirth, gender, breed, owner_user_id, tx = prisma) {
+  async createPet(name, date_of_birth, gender, breed, owner_user_id, tx = prisma) {
     const newPet = await tx.pet.create({
       data: {
         name,
-        date_of_birth: new Date(dateOfBirth),
+        date_of_birth,
         gender,
         breed_id: breed.breed_id,
         owner_user_id,
@@ -32,10 +32,10 @@ export class PetRepository {
     });
   }
 
-  async findPetByNameAndDate(name, dateOfBirth, ownerId = null) {
+  async findPetByNameAndDate(name, date_of_birth, ownerId = null) {
     const whereCondition = {
       name,
-      date_of_birth: new Date(dateOfBirth),
+      date_of_birth,
       is_deleted: false,
     };
 
