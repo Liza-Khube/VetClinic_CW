@@ -144,4 +144,17 @@ export class PetRepository {
       pet_count: Number(row.pet_count),
     }));
   }
+
+  async hardDeletePet(pet_id) {
+    return prisma.pet.delete({
+      where: {
+        pet_id,
+      },
+      include: {
+        breed: {
+          include: { species: true },
+        },
+      },
+    });
+  }
 }

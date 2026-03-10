@@ -139,3 +139,19 @@ export const updatePet = async (req, res, next) => {
     next(err);
   }
 };
+
+export const hardDeletePet = async (req, res, next) => {
+  try {
+    const petId = parseInt(req.params.id, 10);
+    if (isNaN(petId)) {
+      return res.status(400).json({ error: 'Invalid pet ID format' });
+    }
+    const deletedPet = await petService.hardDeletePet(petId);
+    res.status(200).json({
+      message: 'Pet deleted successfully',
+      pet: deletedPet,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

@@ -33,11 +33,7 @@ export class PetService {
         throw new PermissionDeniedError('User account is deleted');
       }
 
-      const existingPet = await this.petRepository.findPetByNameAndDate(
-        name,
-        dateOfBirth,
-        ownerId
-      );
+      const existingPet = await this.petRepository.findPetByNameAndDate(name, dateOfBirth, ownerId);
       if (existingPet) {
         throw new ConflictError('Pet already exists');
       }
@@ -45,11 +41,7 @@ export class PetService {
       const finalBreedName = this._checkedBreedName(breedName);
 
       const species = await speciesService.findCreateSpecies(speciesName, tx);
-      const breed = await breedService.findCreateBreed(
-        species.species_id,
-        finalBreedName,
-        tx
-      );
+      const breed = await breedService.findCreateBreed(species.species_id, finalBreedName, tx);
 
       const newPet = await this.petRepository.createPet(
         name,
@@ -57,7 +49,7 @@ export class PetService {
         gender,
         breed,
         ownerId,
-        tx
+        tx,
       );
       return newPet;
     });
@@ -107,11 +99,7 @@ export class PetService {
         let targetBreedName = this._checkedBreedName(breedName, pet.breed.name);
 
         const species = await speciesService.findCreateSpecies(targetSpeciesName, tx);
-        const breed = await breedService.findCreateBreed(
-          species.species_id,
-          targetBreedName,
-          tx
-        );
+        const breed = await breedService.findCreateBreed(species.species_id, targetBreedName, tx);
 
         dataToUpdate.breed_id = breed.breed_id;
       }
@@ -126,5 +114,18 @@ export class PetService {
     } catch (error) {
       throw new Error(`Fail to view owners and their pets: ${error.message}`);
     }
+  }
+
+  async hardDeletePet(petId) {
+    const pet = await this.petRepository.findPetById(petId);
+
+    if (!pet) {
+      throw new Error('Pet is not found');
+    }
+
+    if (!pet.is_deleted) {
+      throw new Error('Cannot delete a pet that is not marked as deleted');
+    }
+    return await this.petRepository.hardDeletePet(petId);
   }
 }
