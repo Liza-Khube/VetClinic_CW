@@ -1,6 +1,6 @@
 import prisma from '../prismaClient.js';
 
-export class scheduleRepository {
+export class ScheduleRepository {
   async getVetById(vetUserId) {
     return prisma.vet.findUnique({
       where: { user_id: vetUserId },
@@ -148,5 +148,20 @@ export class scheduleRepository {
       INNER JOIN vet v ON v.user_id = md.vet_user_id
       ORDER BY md.total_hours DESC;
     `;
+  }
+
+  async findSlotById(slotId) {
+    return await prisma.slot.findUnique({
+      where: { slot_id: slotId },
+      include: {
+        appointment: true,
+      },
+    });
+  }
+
+  async deleteSlotById(slotId) {
+    return await prisma.slot.deleteMany({
+      where: { slot_id: slotId },
+    });
   }
 }
