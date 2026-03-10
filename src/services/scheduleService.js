@@ -1,4 +1,4 @@
-import { scheduleRepository } from '../repositories/scheduleRepository.js';
+import { ScheduleRepository } from '../repositories/scheduleRepository.js';
 import {
   getProperDate,
   getProperTime,
@@ -18,14 +18,14 @@ const VALID_DAYS = [
 
 export class ScheduleService {
   constructor() {
-    this.scheduleRepository = new scheduleRepository();
+    this.scheduleRepository = new ScheduleRepository();
   }
 
   async createVetSchedule(
     vetUserId,
     scheduleData,
     startDate,
-    durationDays = 30
+    durationDays = 30,
   ) {
     this.validateScheduleData(scheduleData, startDate, durationDays);
 
@@ -46,9 +46,8 @@ export class ScheduleService {
       };
     }
 
-    const existingSchedule = await this.scheduleRepository.checkScheduleExists(
-      vetUserId
-    );
+    const existingSchedule =
+      await this.scheduleRepository.checkScheduleExists(vetUserId);
     if (existingSchedule) {
       throw {
         status: 409,
@@ -63,12 +62,11 @@ export class ScheduleService {
       scheduleData,
       parsedStartDate,
       endDateLimit,
-      vetUserId
+      vetUserId,
     );
 
-    const result = await this.scheduleRepository.createScheduleAndSlots(
-      scheduleWithSlots
-    );
+    const result =
+      await this.scheduleRepository.createScheduleAndSlots(scheduleWithSlots);
 
     return result;
   }
@@ -89,7 +87,7 @@ export class ScheduleService {
         },
         firstTemplateDay,
         endDateLimit,
-        vetUserId
+        vetUserId,
       );
 
       scheduleWithSlots.push({
@@ -181,9 +179,8 @@ export class ScheduleService {
       };
     }
 
-    const existingSchedule = await this.scheduleRepository.getVetSchedule(
-      vetUserId
-    );
+    const existingSchedule =
+      await this.scheduleRepository.getVetSchedule(vetUserId);
 
     if (!existingSchedule || existingSchedule.length === 0) {
       throw {
@@ -221,14 +218,14 @@ export class ScheduleService {
       scheduleData,
       parsedStartDate,
       parsedEndDate,
-      vetUserId
+      vetUserId,
     );
 
     const newSlots = [];
 
     for (const daySchedule of scheduleWithSlots) {
       const template = existingSchedule.find(
-        (t) => t.day_of_week === daySchedule.day_of_week
+        (t) => t.day_of_week === daySchedule.day_of_week,
       );
 
       const slotsWithTemplateId = daySchedule.slots.map((slot) => ({
@@ -251,7 +248,7 @@ export class ScheduleService {
       await this.scheduleRepository.getExistingSlotsInDateRange(
         vetUserId,
         parsedStartDate,
-        parsedEndDate
+        parsedEndDate,
       );
 
     const existingSlotSet = new Set();
@@ -299,7 +296,7 @@ export class ScheduleService {
 
     const scheduleTemplates = await this.scheduleRepository.getVetSchedule(
       vetUserId,
-      dayChoice ? dayChoice.toLowerCase() : undefined
+      dayChoice ? dayChoice.toLowerCase() : undefined,
     );
 
     const formattedSchedule = scheduleTemplates.map((schedule) => {
@@ -326,7 +323,7 @@ export class ScheduleService {
       vetUserId,
       dateChoice,
       limit,
-      offset
+      offset,
     );
 
     const filteredSlots = slots.map((slot) => {
@@ -376,7 +373,7 @@ export class ScheduleService {
     const analytics = await this.scheduleRepository.getClinicStatistics(
       targetMonth,
       targetYear,
-      targetMinSlotsCount
+      targetMinSlotsCount,
     );
 
     return {

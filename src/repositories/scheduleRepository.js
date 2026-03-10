@@ -1,6 +1,6 @@
 import prisma from '../prismaClient.js';
 
-export class scheduleRepository {
+export class ScheduleRepository {
   async getVetById(vetUserId) {
     return prisma.vet.findUnique({
       where: { user_id: vetUserId },
