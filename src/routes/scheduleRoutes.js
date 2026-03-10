@@ -6,6 +6,7 @@ import {
   getClinicAnalytics,
   getSchedule,
   getSlots,
+  deleteOneSlot,
 } from '../controllers/scheduleController.js';
 
 const router = express.Router();
@@ -14,14 +15,14 @@ router.post(
   '/vets/:vetUserId/schedule',
   authenticate,
   authorize('admin'),
-  createSchedule
+  createSchedule,
 );
 
 router.post(
   '/vets/:vetUserId/schedule/slots',
   authenticate,
   authorize('admin'),
-  addSlots
+  addSlots,
 );
 
 router.get('/vets/:vetUserId/schedule', getSchedule);
@@ -32,7 +33,14 @@ router.get(
   '/vets/schedule/analytics',
   authenticate,
   authorize('admin'),
-  getClinicAnalytics
+  getClinicAnalytics,
+);
+
+router.delete(
+  '/vets/:vetUserId/schedule/slots/:slotId',
+  authenticate,
+  authorize('admin'),
+  deleteOneSlot,
 );
 
 export default router;

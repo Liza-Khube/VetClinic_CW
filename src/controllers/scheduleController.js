@@ -17,7 +17,7 @@ export const createSchedule = async (req, res, next) => {
       vetUserId,
       scheduleData,
       startDate,
-      durationDays
+      durationDays,
     );
 
     res.status(201).json({
@@ -69,7 +69,7 @@ export const getSlots = async (req, res, next) => {
       vetUserId,
       dateChoice,
       amountLimit,
-      pageOffset
+      pageOffset,
     );
 
     res.status(200).json({
@@ -101,7 +101,7 @@ export const addSlots = async (req, res, next) => {
     const result = await scheduleService.addSlotsToSchedule(
       vetUserId,
       startDate,
-      endDate
+      endDate,
     );
 
     const status = result.addedSlots > 0 ? 201 : 200;
@@ -136,12 +136,34 @@ export const getClinicAnalytics = async (req, res, next) => {
     const stats = await scheduleService.getClinicStats(
       targetMonth,
       targetYear,
-      targetMinSlotsCount
+      targetMinSlotsCount,
     );
 
     res.status(200).json({
       message: 'Clinic performance report generated',
       ...stats,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteOneSlot = async (req, res, next) => {
+  try {
+    const vetUserId = parseInt(req.params.vetUserId);
+    const slotId = parseInt(req.params.slotId);
+
+    if (isNaN(vetUserId) || isNaN(slotId)) {
+      throw {
+        status: 400,
+        message: 'Invalid vet ID or slot ID in URL parameters',
+      };
+    }
+
+    await scheduleService.deleteSlot(slotId, vetUserId);
+
+    res.status(200).json({
+      message: 'Slot is successfully deleted',
     });
   } catch (err) {
     next(err);

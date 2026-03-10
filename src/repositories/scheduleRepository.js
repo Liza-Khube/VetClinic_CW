@@ -149,4 +149,19 @@ export class ScheduleRepository {
       ORDER BY md.total_hours DESC;
     `;
   }
+
+  async findSlotById(slotId) {
+    return await prisma.slot.findUnique({
+      where: { slot_id: slotId },
+      include: {
+        appointment: true,
+      },
+    });
+  }
+
+  async deleteSlotById(slotId) {
+    return await prisma.slot.deleteMany({
+      where: { slot_id: slotId },
+    });
+  }
 }

@@ -382,4 +382,28 @@ export class ScheduleService {
       reportData: analytics,
     };
   }
+
+  async deleteSlot(slotId, vetUserId) {
+    const slot = await this.scheduleRepository.findSlotById(slotId);
+
+    if (!slot) {
+      throw { status: 404, message: 'Slot not found' };
+    }
+
+    if (slot.vet_user_id !== vetUserId) {
+      throw {
+        status: 404,
+        message: 'Slot not found for this vet',
+      };
+    }
+
+    if (slot.appointment) {
+      throw {
+        status: 400,
+        message: 'There is an existing appointment for this slot',
+      };
+    }
+
+    return await this.scheduleRepository.deleteSlotById(slotId);
+  }
 }
